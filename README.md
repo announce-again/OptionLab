@@ -1,4 +1,3 @@
-# OptionLab
+# NCX Derivatives
 
-OptionLab project workspace.
-
+A from-scratch quantitative derivatives research and market-making platform.

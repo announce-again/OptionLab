@@ -502,7 +502,7 @@ Order Flow
 论文：
 
 ```
-OptionLab Research #1
+NCX Derivatives Research #1
 
 Why Does IV Smile Change Around Earnings?
 ```
@@ -544,29 +544,15 @@ Predicting Volatility Surface using Machine Learning
 GitHub：
 
 ```
-OptionLab/
-
-Pricing Library
-
-Greeks Library
-
-Data Pipeline
-
-Research Papers
-
-Interactive Dashboard
-
-Market Maker
-
-Strategy Simulator
-
-Risk Engine
+ncx-derivatives/
+└── src/
+    └── ncx_derivatives/
 ```
 
 Website：
 
 ```
-optionlab.dev
+ncx-derivatives.dev
 ```
 
 包含：
