@@ -1,4 +1,5 @@
 import pytest
+from ncx_derivatives.pricing import call_price, put_price
 
 from ncx_derivatives.greeks import (
     call_delta,
@@ -113,3 +114,420 @@ def test_put_rho_benchmark() -> None:
     )
 
     assert result == pytest.approx(-41.890461, abs=1e-6)
+
+@pytest.mark.parametrize(
+    ("spot", "strike", "maturity", "rate", "volatility"),
+    [
+        (100.0, 100.0, 1.0, 0.05, 0.20),
+        (120.0, 100.0, 0.50, 0.03, 0.30),
+        (80.0, 100.0, 2.00, -0.01, 0.40),
+    ],
+)
+def test_call_delta_matches_central_difference(
+    spot: float,
+    strike: float,
+    maturity: float,
+    rate: float,
+    volatility: float,
+) -> None:
+    step = 1e-4 * spot
+
+    numerical_delta = (
+        call_price(
+            spot + step,
+            strike,
+            maturity,
+            rate,
+            volatility,
+        )
+        - call_price(
+            spot - step,
+            strike,
+            maturity,
+            rate,
+            volatility,
+        )
+    ) / (2.0 * step)
+
+    analytical_delta = call_delta(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+    )
+
+    assert analytical_delta == pytest.approx(
+        numerical_delta,
+        rel=1e-6,
+        abs=1e-8,
+    )
+
+
+@pytest.mark.parametrize(
+    ("spot", "strike", "maturity", "rate", "volatility"),
+    [
+        (100.0, 100.0, 1.0, 0.05, 0.20),
+        (120.0, 100.0, 0.50, 0.03, 0.30),
+        (80.0, 100.0, 2.00, -0.01, 0.40),
+    ],
+)
+def test_put_delta_matches_central_difference(
+    spot: float,
+    strike: float,
+    maturity: float,
+    rate: float,
+    volatility: float,
+) -> None:
+    step = 1e-4 * spot
+
+    numerical_delta = (
+        put_price(
+            spot + step,
+            strike,
+            maturity,
+            rate,
+            volatility,
+        )
+        - put_price(
+            spot - step,
+            strike,
+            maturity,
+            rate,
+            volatility,
+        )
+    ) / (2.0 * step)
+
+    analytical_delta = put_delta(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+    )
+
+    assert analytical_delta == pytest.approx(
+        numerical_delta,
+        rel=1e-6,
+        abs=1e-8,
+    )
+
+
+@pytest.mark.parametrize(
+    ("spot", "strike", "maturity", "rate", "volatility"),
+    [
+        (100.0, 100.0, 1.0, 0.05, 0.20),
+        (120.0, 100.0, 0.50, 0.03, 0.30),
+        (80.0, 100.0, 2.00, -0.01, 0.40),
+    ],
+)
+def test_gamma_matches_second_central_difference(
+    spot: float,
+    strike: float,
+    maturity: float,
+    rate: float,
+    volatility: float,
+) -> None:
+    step = 1e-3 * spot
+
+    price_up = call_price(
+        spot + step,
+        strike,
+        maturity,
+        rate,
+        volatility,
+    )
+    price_mid = call_price(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+    )
+    price_down = call_price(
+        spot - step,
+        strike,
+        maturity,
+        rate,
+        volatility,
+    )
+
+    numerical_gamma = (
+        price_up - 2.0 * price_mid + price_down
+    ) / (step * step)
+
+    analytical_gamma = gamma(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+    )
+
+    assert analytical_gamma == pytest.approx(
+        numerical_gamma,
+        rel=1e-5,
+        abs=1e-8,
+    )
+
+
+@pytest.mark.parametrize(
+    ("spot", "strike", "maturity", "rate", "volatility"),
+    [
+        (100.0, 100.0, 1.0, 0.05, 0.20),
+        (120.0, 100.0, 0.50, 0.03, 0.30),
+        (80.0, 100.0, 2.00, -0.01, 0.40),
+    ],
+)
+def test_vega_matches_central_difference(
+    spot: float,
+    strike: float,
+    maturity: float,
+    rate: float,
+    volatility: float,
+) -> None:
+    step = 1e-5
+
+    numerical_vega = (
+        call_price(
+            spot,
+            strike,
+            maturity,
+            rate,
+            volatility + step,
+        )
+        - call_price(
+            spot,
+            strike,
+            maturity,
+            rate,
+            volatility - step,
+        )
+    ) / (2.0 * step)
+
+    analytical_vega = vega(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+    )
+
+    assert analytical_vega == pytest.approx(
+        numerical_vega,
+        rel=1e-6,
+        abs=1e-7,
+    )
+
+
+@pytest.mark.parametrize(
+    ("spot", "strike", "maturity", "rate", "volatility"),
+    [
+        (100.0, 100.0, 1.0, 0.05, 0.20),
+        (120.0, 100.0, 0.50, 0.03, 0.30),
+        (80.0, 100.0, 2.00, -0.01, 0.40),
+    ],
+)
+def test_call_rho_matches_central_difference(
+    spot: float,
+    strike: float,
+    maturity: float,
+    rate: float,
+    volatility: float,
+) -> None:
+    step = 1e-5
+
+    numerical_rho = (
+        call_price(
+            spot,
+            strike,
+            maturity,
+            rate + step,
+            volatility,
+        )
+        - call_price(
+            spot,
+            strike,
+            maturity,
+            rate - step,
+            volatility,
+        )
+    ) / (2.0 * step)
+
+    analytical_rho = call_rho(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+    )
+
+    assert analytical_rho == pytest.approx(
+        numerical_rho,
+        rel=1e-6,
+        abs=1e-7,
+    )
+
+
+@pytest.mark.parametrize(
+    ("spot", "strike", "maturity", "rate", "volatility"),
+    [
+        (100.0, 100.0, 1.0, 0.05, 0.20),
+        (120.0, 100.0, 0.50, 0.03, 0.30),
+        (80.0, 100.0, 2.00, -0.01, 0.40),
+    ],
+)
+def test_put_rho_matches_central_difference(
+    spot: float,
+    strike: float,
+    maturity: float,
+    rate: float,
+    volatility: float,
+) -> None:
+    step = 1e-5
+
+    numerical_rho = (
+        put_price(
+            spot,
+            strike,
+            maturity,
+            rate + step,
+            volatility,
+        )
+        - put_price(
+            spot,
+            strike,
+            maturity,
+            rate - step,
+            volatility,
+        )
+    ) / (2.0 * step)
+
+    analytical_rho = put_rho(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+    )
+
+    assert analytical_rho == pytest.approx(
+        numerical_rho,
+        rel=1e-6,
+        abs=1e-7,
+    )
+
+@pytest.mark.parametrize(
+    ("spot", "strike", "maturity", "rate", "volatility"),
+    [
+        (100.0, 100.0, 1.0, 0.05, 0.20),
+        (120.0, 100.0, 0.50, 0.03, 0.30),
+        (80.0, 100.0, 2.00, -0.01, 0.40),
+    ],
+)
+def test_call_theta_matches_maturity_difference(
+    spot: float,
+    strike: float,
+    maturity: float,
+    rate: float,
+    volatility: float,
+) -> None:
+    step = 1e-5
+
+    maturity_derivative = (
+        call_price(
+            spot,
+            strike,
+            maturity + step,
+            rate,
+            volatility,
+        )
+        - call_price(
+            spot,
+            strike,
+            maturity - step,
+            rate,
+            volatility,
+        )
+    ) / (2.0 * step)
+
+    analytical_theta = call_theta(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+    )
+
+    assert analytical_theta == pytest.approx(
+        -maturity_derivative,
+        rel=1e-6,
+        abs=1e-7,
+    )
+
+
+@pytest.mark.parametrize(
+    ("spot", "strike", "maturity", "rate", "volatility"),
+    [
+        (100.0, 100.0, 1.0, 0.05, 0.20),
+        (120.0, 100.0, 0.50, 0.03, 0.30),
+        (80.0, 100.0, 2.00, -0.01, 0.40),
+    ],
+)
+def test_put_theta_matches_maturity_difference(
+    spot: float,
+    strike: float,
+    maturity: float,
+    rate: float,
+    volatility: float,
+) -> None:
+    step = 1e-5
+
+    maturity_derivative = (
+        put_price(
+            spot,
+            strike,
+            maturity + step,
+            rate,
+            volatility,
+        )
+        - put_price(
+            spot,
+            strike,
+            maturity - step,
+            rate,
+            volatility,
+        )
+    ) / (2.0 * step)
+
+    analytical_theta = put_theta(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+    )
+
+    assert analytical_theta == pytest.approx(
+        -maturity_derivative,
+        rel=1e-6,
+        abs=1e-7,
+    )
+
+def test_call_and_put_delta_differ_by_one() -> None:
+    call = call_delta(100.0, 100.0, 1.0, 0.05, 0.20)
+    put = put_delta(100.0, 100.0, 1.0, 0.05, 0.20)
+
+    assert call - put == pytest.approx(1.0, abs=1e-12)
+
+
+def test_gamma_is_positive() -> None:
+    result = gamma(100.0, 100.0, 1.0, 0.05, 0.20)
+
+    assert result > 0.0
+
+
+def test_vega_is_positive() -> None:
+    result = vega(100.0, 100.0, 1.0, 0.05, 0.20)
+
+    assert result > 0.0
