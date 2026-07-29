@@ -1,5 +1,4 @@
-from optionlab.pricing import call_price, put_price
-
+from ncx_derivatives.pricing import call_price, put_price
 
 def test_black_scholes_prices():
     call = call_price(
