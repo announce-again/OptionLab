@@ -1,4 +1,6 @@
-from math import erf, exp, log, sqrt
+from math import exp
+
+from ncx_derivatives.utils.black_scholes import d1, d2, norm_cdf
 
 
 def _validate_inputs(
@@ -15,32 +17,6 @@ def _validate_inputs(
         raise ValueError("maturity must be non-negative")
     if sigma < 0.0:
         raise ValueError("volatility must be non-negative")
-
-
-def _norm_cdf(x: float) -> float:
-    """Standard normal cumulative distribution function."""
-    return 0.5 * (1.0 + erf(x / sqrt(2.0)))
-
-
-def _d1(
-    S: float,
-    K: float,
-    T: float,
-    r: float,
-    sigma: float,
-) -> float:
-    return (
-        log(S / K)
-        + (r + 0.5 * sigma ** 2) * T
-    ) / (sigma * sqrt(T))
-
-
-def _d2(
-    d1: float,
-    T: float,
-    sigma: float,
-) -> float:
-    return d1 - sigma * sqrt(T)
 
 
 def call_price(
@@ -61,12 +37,12 @@ def call_price(
         discounted_strike = K * exp(-r * T)
         return max(S - discounted_strike, 0.0)
 
-    d1 = _d1(S, K, T, r, sigma)
-    d2 = _d2(d1, T, sigma)
+    d_1 = d1(S, K, T, r, sigma)
+    d_2 = d2(S, K, T, r, sigma)
 
     return (
-        S * _norm_cdf(d1)
-        - K * exp(-r * T) * _norm_cdf(d2)
+        S * norm_cdf(d_1)
+        - K * exp(-r * T) * norm_cdf(d_2)
     )
 
 
@@ -88,10 +64,10 @@ def put_price(
         discounted_strike = K * exp(-r * T)
         return max(discounted_strike - S, 0.0)
 
-    d1 = _d1(S, K, T, r, sigma)
-    d2 = _d2(d1, T, sigma)
+    d_1 = d1(S, K, T, r, sigma)
+    d_2 = d2(S, K, T, r, sigma)
 
     return (
-        K * exp(-r * T) * _norm_cdf(-d2)
-        - S * _norm_cdf(-d1)
+        K * exp(-r * T) * norm_cdf(-d_2)
+        - S * norm_cdf(-d_1)
     )
