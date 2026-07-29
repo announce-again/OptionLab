@@ -138,3 +138,65 @@ def test_option_prices_respect_no_arbitrage_bounds(
 
     assert call_lower_bound <= call <= spot
     assert put_lower_bound <= put <= discounted_strike
+
+def test_call_and_put_return_payoff_at_maturity() -> None:
+    """At expiry, option prices equal intrinsic value."""
+
+    assert call_price(100.0, 90.0, 0.0, 0.05, 0.20) == 10.0
+    assert call_price(100.0, 110.0, 0.0, 0.05, 0.20) == 0.0
+
+    assert put_price(100.0, 110.0, 0.0, 0.05, 0.20) == 10.0
+    assert put_price(100.0, 90.0, 0.0, 0.05, 0.20) == 0.0
+
+
+def test_zero_volatility_returns_discounted_deterministic_payoff() -> None:
+    """With zero volatility, pricing reduces to discounted intrinsic value."""
+
+    spot = 100.0
+    strike = 105.0
+    maturity = 1.5
+    rate = 0.04
+    volatility = 0.0
+
+    discounted_strike = strike * exp(-rate * maturity)
+
+    assert call_price(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+    ) == pytest.approx(max(spot - discounted_strike, 0.0))
+    assert put_price(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+    ) == pytest.approx(max(discounted_strike - spot, 0.0))
+
+
+@pytest.mark.parametrize(
+    ("spot", "strike", "maturity", "rate", "volatility"),
+    [
+        (0.0, 100.0, 1.0, 0.05, 0.20),
+        (-100.0, 100.0, 1.0, 0.05, 0.20),
+        (100.0, 0.0, 1.0, 0.05, 0.20),
+        (100.0, -100.0, 1.0, 0.05, 0.20),
+        (100.0, 100.0, -1.0, 0.05, 0.20),
+        (100.0, 100.0, 1.0, 0.05, -0.20),
+    ],
+)
+def test_option_prices_reject_invalid_inputs(
+    spot: float,
+    strike: float,
+    maturity: float,
+    rate: float,
+    volatility: float,
+) -> None:
+    """Invalid market or contract inputs raise ValueError."""
+
+    with pytest.raises(ValueError):
+        call_price(spot, strike, maturity, rate, volatility)
+    with pytest.raises(ValueError):
+        put_price(spot, strike, maturity, rate, volatility)
