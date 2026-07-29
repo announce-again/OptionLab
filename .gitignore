@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+
+# Packaging
+build/
+dist/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data and reports generated locally
+data/raw/
+data/processed/
+reports/generated/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+

@@ -1,0 +1,6 @@
+[project]
+name = "optionlab"
+version = "0.1.0"
+description = "OptionLab project workspace."
+requires-python = ">=3.10"
+
