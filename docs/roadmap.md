@@ -880,6 +880,10 @@ Stage 2.1 model boundary.
 Build structured, reusable validation that separates fatal structural errors
 from data-quality warnings.
 
+Model invariants are enforced by Stage 2.1 constructors. Stage 2.2 validates
+data-quality and cross-record issues that can still exist in valid canonical
+objects.
+
 ### Planned Capabilities
 
 - Field-level validation
@@ -894,10 +898,108 @@ from data-quality warnings.
 - Inconsistent underlying detection
 - Timestamp consistency checks
 - Avoid representing every issue as a direct `ValueError`
+- Future-relative-to-snapshot timestamp checks
+- One quote per canonical contract per snapshot
+- Built-in validation code constants
 
 ### Status
 
-**Planned**
+**Complete**
+
+---
+
+## Stage 2.2a — Validation Severity and Issues
+
+### Scope
+
+Define structured validation primitives that callers can inspect without
+catching exceptions.
+
+### Capabilities
+
+- `ValidationSeverity.ERROR`
+- `ValidationSeverity.WARNING`
+- `ValidationSeverity.INFO`
+- `ValidationIssue`
+- `BuiltinValidationCode`
+- Machine-readable issue codes
+- Location paths
+- Optional structured context
+- Stable `ValueError` for invalid validation primitive inputs
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.2b — Validation Reports
+
+### Scope
+
+Aggregate validation issues into reusable reports.
+
+### Capabilities
+
+- `ValidationReport`
+- Severity-filtered issue access
+- `has_errors`
+- `has_warnings`
+- `is_valid`
+- `by_code`
+- `at_location_prefix`
+- Report combination
+- Location-prefixing for nested validation
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.2c — Record-Level Validation
+
+### Scope
+
+Validate canonical contracts, quotes, trades, and underlying observations
+without mutating or cleaning them.
+
+### Capabilities
+
+- Contract optional-identity field diagnostics
+- Missing bid and ask diagnostics
+- Empty market diagnostics
+- Crossed and locked quote diagnostics
+- Zero bid and ask informational issues
+- Open-interest reference-date diagnostics
+- Trade-size diagnostics
+- Underlying bid-ask diagnostics
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.2d — Snapshot-Level Validation
+
+### Scope
+
+Validate a logical option-chain snapshot as a collection of canonical records.
+
+### Capabilities
+
+- Empty snapshot diagnostics
+- Missing underlying quote diagnostics
+- Duplicate quote detection by contract within a snapshot
+- Quote timestamp after snapshot checks
+- Underlying timestamp after snapshot checks
+- Trade timestamp consistency checks
+- Nested issue location paths
+
+### Status
+
+**Complete**
 
 ---
 
@@ -1753,8 +1855,8 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Begin Stage 2.2 — Validation Framework
-2. Build CSV ingestion and normalisation on top of canonical models
+1. Begin Stage 2.3 — CSV Ingestion
+2. Build normalisation on top of canonical models
 3. Build chain-wide implied-volatility workflows
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.
