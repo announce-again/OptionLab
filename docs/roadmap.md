@@ -246,30 +246,131 @@ Introduce the first general-purpose numerical pricing method using the Cox–Ros
 
 Develop a reusable simulation framework for pricing and sensitivity estimation.
 
-### Planned Capabilities
+Monte Carlo prices are statistical estimates rather than exact values. The
+first public API should return a result object instead of a bare float:
 
-- Geometric Brownian motion path generation
-- European option pricing
-- Antithetic variates
-- Control variates
-- Standard-error estimation
-- Confidence intervals
+```python
+MonteCarloResult(
+    price=...,
+    standard_error=...,
+    confidence_interval=...,
+    simulations=...,
+)
+```
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 1.6a — GBM Terminal Simulation
+
+### Scope
+
+Implement reproducible terminal-price simulation under risk-neutral geometric
+Brownian motion.
+
+### Capabilities
+
+- Terminal stock-price simulation
+- Continuous dividend yield through drift \(r-q\)
 - Reproducible random seeds
-- Vectorised simulation
-- Batch pricing
-- Path-dependent payoff interface
+- Batch terminal simulation
+- Input validation
+
+### Validation
+
+- Simulated terminal mean close to risk-neutral forward
+- Simulated log-return variance close to \(\sigma^2 T\)
+- Reproducibility tests with fixed seeds
+- Stability across moneyness, maturities, rates, and dividend yields
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 1.6b — European Monte Carlo Pricing
+
+### Scope
+
+Price European call and put options from simulated terminal payoffs.
+
+### Capabilities
+
+- European call pricing
+- European put pricing
+- Discounted payoff estimation
+- `MonteCarloResult` return object
+- Configurable simulation count
+- Batch-ready pricing structure
 
 ### Validation
 
 - Convergence to Black–Scholes–Merton prices
-- Confidence-interval coverage
-- Error reduction from variance-reduction methods
+- Comparison against binomial tree prices
+- Intrinsic-value and non-negativity checks
 - Reproducibility tests
-- Comparison against binomial and analytical prices
 
 ### Status
 
-**Planned**
+**Complete**
+
+---
+
+## Stage 1.6c — Standard Error and Confidence Intervals
+
+### Scope
+
+Expose uncertainty estimates for Monte Carlo prices.
+
+### Capabilities
+
+- Standard-error estimation
+- Configurable confidence level
+- Confidence intervals
+- Simulation count reporting
+- Payoff variance diagnostics
+
+### Validation
+
+- Confidence-interval coverage checks
+- Standard error decreases at approximately \(1/\sqrt{N}\)
+- Deterministic zero-volatility behaviour
+- Invalid confidence-level handling
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 1.6d — Variance Reduction
+
+### Scope
+
+Add variance-reduction methods for European option Monte Carlo pricing.
+
+### Capabilities
+
+- Antithetic variates
+- Control variates
+- Black–Scholes–Merton control for European options
+- Error-reduction diagnostics
+- Variance-reduction configuration
+
+### Validation
+
+- Antithetic estimator reduces or maintains variance
+- Control variate improves convergence to analytical prices
+- Reproducibility with variance-reduction enabled
+- Comparison against plain Monte Carlo at equal random draw budgets
+
+### Status
+
+**Complete**
 
 ---
 
@@ -888,11 +989,10 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Implement Monte Carlo pricing with uncertainty estimates
-2. Introduce numerical Greek estimators
-3. Begin market-data models and option-chain processing
-4. Build chain-wide implied-volatility workflows
-5. Start volatility smile and surface research
+1. Introduce numerical Greek estimators
+2. Begin market-data models and option-chain processing
+3. Build chain-wide implied-volatility workflows
+4. Start volatility smile and surface research
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.
 
