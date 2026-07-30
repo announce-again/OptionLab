@@ -1401,6 +1401,42 @@ quote objects.
 - No-arbitrage lower and upper bounds
 - Independent enriched quote object, for example `EnrichedOptionQuote`
 
+### Implemented Capabilities
+
+- `DayCountConvention`
+- `DayCount`
+- `ActualFixedDayCount`
+- `year_fraction`
+- `midpoint`
+- `absolute_spread`
+- `relative_spread`
+- `intrinsic_value`
+- `NoArbitrageBounds`
+- `no_arbitrage_bounds`
+- `european_no_arbitrage_bounds`
+- `EnrichedOptionQuote`
+- `enrich_option_quote`
+- `enrich_option_chain_snapshot`
+
+### Boundary Notes
+
+Stage 2.6 computes derived research fields from valid canonical objects. It
+does not reject quotes for quality reasons and does not emit diagnostics.
+Crossed quotes can therefore produce negative spreads, which Stage 2.7
+cleaning policies will decide how to reject or retain.
+
+The lower and upper bounds are single-contract discounted reference bounds
+computed from spot, risk-free discount factors, and dividend discount factors.
+Stage 2.6 currently provides European no-arbitrage bounds only. American,
+Bermudan, and unknown exercise styles do not receive generic bounds in the
+enriched quote. Stage 2.8 remains responsible for reporting arbitrage
+violations.
+
+Time to maturity for option contracts with date-only expirations is computed
+from an explicit `valuation_date`, not by silently truncating the UTC
+`valuation_timestamp`. Callers are responsible for choosing the correct market
+calendar date before enrichment.
+
 ### Core Relationships
 
 \[
@@ -1417,7 +1453,7 @@ k=\ln\left(\frac{K}{F}\right)
 
 ### Status
 
-**Planned**
+**Complete**
 
 ---
 
@@ -2123,8 +2159,8 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Begin Stage 2.6 — Derived Fields and Year Fractions
-2. Build cleaning policies
+1. Begin Stage 2.7 — Cleaning Policies
+2. Build static-arbitrage diagnostics
 3. Build chain-wide implied-volatility workflows
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.
