@@ -1300,7 +1300,78 @@ F(T)=Se^{(r-q)T}
 
 ### Status
 
-**Planned**
+**Complete**
+
+---
+
+## Stage 2.5a — Curve Interfaces and Policies
+
+### Scope
+
+Define the minimal curve language required by later enrichment and diagnostics.
+
+### Capabilities
+
+- `DiscountFactorCurve`
+- `ZeroRateCurve`
+- `DividendYieldCurve`
+- `InterpolationPolicy.FLAT`
+- Discount-factor lookup interface
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.5b — Flat Curve Implementations
+
+### Scope
+
+Support initial flat continuously compounded assumptions before term
+structures are introduced.
+
+### Capabilities
+
+- `FlatZeroRateCurve`
+- `FlatDividendYieldCurve`
+- Negative zero-rate support
+- Input validation for maturities and finite values
+- Discount factors satisfy \(D(0)=1\)
+- Stage 2.5 only records the flat policy; interpolation across curve nodes is
+  not yet implemented
+
+### Curve Semantics
+
+`DiscountFactorCurve` is a generic positive maturity-factor interface. For a
+`DividendYieldCurve`, `discount_factor(T)` means \(e^{-qT}\), not a risk-free
+present-value discount factor.
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.5c — Carry and Forward Price Helpers
+
+### Scope
+
+Compute forward prices from spot, risk-free discount factors, and dividend
+discount factors.
+
+### Capabilities
+
+- `CarryAssumptions`
+- `discount_factor_from_zero_rate`
+- `forward_price`
+- `flat_forward_price`
+- Relationship \(F(T)=S D_q(T) / D_r(T)\)
+- Flat continuously compounded relationship \(F(T)=Se^{(r-q)T}\)
+
+### Status
+
+**Complete**
 
 ---
 
@@ -2052,8 +2123,8 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Begin Stage 2.5 — Rates, Dividends, and Forwards
-2. Build derived fields and year fractions
+1. Begin Stage 2.6 — Derived Fields and Year Fractions
+2. Build cleaning policies
 3. Build chain-wide implied-volatility workflows
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.
