@@ -1,599 +1,915 @@
-我觉得，我们可以把这个当成你未来 **1-2 年的旗舰项目 (Flagship Project)**。
+# NCX Derivatives Roadmap
 
-**目标不是做一个 Resume Project。**
+NCX Derivatives is a from-scratch quantitative derivatives research and market-making platform.
 
-目标是：
-
-> **Build an institutional-grade Option Research Platform.**
-
-一句话介绍就是：
-
-> **An end-to-end research platform for pricing, analysing, simulating and market-making equity options using real market data.**
-
-这是我认为最适合你（DSA + QF + WorldQuant + 想做 Option Trading）的路线。
+The project is designed to progress from mathematically transparent pricing models to a modular research, risk, and electronic market-making system. Each stage should produce a usable, tested component rather than a collection of disconnected notebooks.
 
 ---
 
-# 总体架构
+## Engineering Principles
 
-```
-                  ┌──────────────────────┐
-                  │  Real Market Data    │
-                  └──────────┬───────────┘
-                             │
-                  Data Pipeline
-                             │
-                             ▼
-                  Historical Database
-                             │
-        ┌─────────────┬──────────────┬──────────────┐
-        ▼             ▼              ▼
- Pricing Engine   Vol Research   ML Research
-        │             │              │
-        └─────────────┴──────────────┘
-                      │
-               Trading Engine
-                      │
-               Risk Engine
-                      │
-               Strategy Evaluation
-                      │
-                Research Reports
+Development follows several core principles:
+
+- Mathematical correctness before optimisation
+- Explicit assumptions and unit conventions
+- Stable, documented public APIs
+- Analytical results validated against numerical methods
+- Numerical methods validated through convergence and invariants
+- Input validation and well-defined boundary behaviour
+- Reproducible research workflows
+- Automated testing for every production-facing component
+- Separation between reusable library code and exploratory research
+- Incremental commits organised around complete milestones
+
+The standard development cycle is:
+
+```text
+Design
+→ Implement
+→ Test
+→ Validate
+→ Document
+→ Commit
 ```
 
 ---
 
-# Phase 0（2 周）
+# Stage 0 — Engineering Foundation
 
-## 学习目标
+## Objective
 
-建立整个知识体系。
+Establish a maintainable Python project suitable for long-term quantitative research and software development.
 
-### 阅读
+## Deliverables
 
-Hull《Options, Futures and Other Derivatives》
+- `src/`-based Python package structure
+- Editable package installation
+- `pyproject.toml` configuration
+- Automated testing with `pytest`
+- Consistent module boundaries
+- Git and GitHub integration
+- Project documentation
+- Ignore rules for generated files and local environments
 
-重点：
+## Completion Criteria
 
-- Black-Scholes
-- Greeks
-- Volatility
-- Delta Hedging
-- Binomial Tree
+- Package imports correctly after `pip install -e .`
+- Tests run from the repository root
+- Generated files are excluded from version control
+- Repository naming and package naming are consistent
+- Initial documentation accurately describes the project
 
-不用全部看。
+## Status
 
-大概前 15 章。
-
----
-
-## Coding
-
-建立 Repo。
-
-```
-option-lab/
-
-README.md
-
-docs/
-
-pricing/
-
-data/
-
-research/
-
-strategies/
-
-risk/
-
-notebooks/
-
-tests/
-```
-
-全部 Git 管理。
+**Complete**
 
 ---
 
-# Phase 1（4 周）
+# Stage 1 — Pricing and Volatility Foundation
 
-## Option Pricing Library
+## Objective
 
-全部自己写。
-
-禁止 copy package。
-
-实现：
-
-### Black-Scholes
-
-European Call
-
-European Put
+Build a reliable analytical and numerical foundation for derivatives pricing.
 
 ---
 
-### Greeks
+## Stage 1.1 — Black–Scholes–Merton Pricing
 
-Delta
+### Scope
 
-Gamma
+Implement European call and put pricing under the Black–Scholes–Merton model.
 
-Theta
+### Capabilities
 
-Vega
+- European call pricing
+- European put pricing
+- Continuous dividend yield
+- Negative interest-rate support
+- Expiry payoff handling
+- Zero-volatility deterministic limits
+- Input validation
+- Static no-arbitrage bounds
 
-Rho
+### Validation
 
----
+- Published benchmark prices
+- Put-call parity
+- Price monotonicity
+- Volatility monotonicity
+- Static-arbitrage bounds
+- Boundary and invalid-input tests
 
-### Implied Volatility
+### Status
 
-Newton Method
-
-Bisection
-
-Hybrid Solver
-
----
-
-### Binomial Tree
-
-European
-
-American
-
-Dividend
+**Complete**
 
 ---
 
-### Monte Carlo
+## Stage 1.2 — Analytical Greeks
 
-European
+### Scope
 
-Antithetic
+Implement first- and second-order sensitivities for European options.
 
-Control Variate
+### Capabilities
 
----
+- Call and put Delta
+- Gamma
+- Vega
+- Call and put Theta
+- Call and put Rho
+- Continuous-dividend Black–Scholes–Merton formulas
+- Explicit unit conventions
 
-输出：
+### Validation
 
-```
-pricing/
+- Published benchmark values
+- Central finite-difference Delta
+- Second central-difference Gamma
+- Central finite-difference Vega
+- Maturity-difference Theta
+- Central finite-difference Rho
+- Structural Greek relationships
 
-black_scholes.py
+### Status
 
-greeks.py
-
-implied_vol.py
-
-binomial.py
-
-monte_carlo.py
-```
-
----
-
-# Phase 2（3 周）
-
-## Real Data Pipeline
-
-开始抓真实数据。
-
-例如：
-
-Polygon
-
-Databento
-
-Yahoo
-
-Deribit
-
-（学生预算允许的话可升级）
-
-每天：
-
-自动下载：
-
-```
-Underlying
-
-Option Chain
-
-Bid
-
-Ask
-
-Volume
-
-Open Interest
-
-IV
-```
-
-全部存 SQLite。
+**Complete**
 
 ---
 
-# Phase 3（4 周）
+## Stage 1.3 — Implied Volatility Solver
 
-## Volatility Research
+### Scope
 
-真正开始研究。
+Invert Black–Scholes–Merton prices to recover implied volatility.
 
-例如：
+### Capabilities
 
-### Project 1
+- Call implied volatility
+- Put implied volatility
+- Hybrid Newton and bisection solver
+- Bracket-preserving Newton steps
+- Bisection fallback
+- Low-Vega protection
+- No-arbitrage price validation
+- Lower-bound mapping to zero volatility
+- Upper-bound mapping to infinite volatility
+- Configurable convergence tolerance and iteration limits
 
-IV Smile
+### Validation
 
-画：
+- Price-to-volatility round trips
+- Deep in-the-money options
+- Deep out-of-the-money options
+- Near-expiry options
+- Negative interest rates
+- Continuous dividend yields
+- Boundary prices
+- Invalid market prices
 
-不同到期。
+### Status
 
-不同日期。
-
-不同股票。
-
----
-
-### Project 2
-
-Vol Surface
-
-3D。
-
-Surface。
-
----
-
-### Project 3
-
-Historical Vol
-
-vs
-
-Implied Vol。
-
-研究：
-
-什么时候差距最大。
+**Complete**
 
 ---
 
-### 输出
+## Stage 1.4 — Continuous Dividend Yield
 
-Research Note #1
+### Scope
 
-20 页。
+Extend the analytical pricing, Greeks, and implied-volatility stack from Black–Scholes to Black–Scholes–Merton with continuous dividend yield \(q\).
 
----
+### Capabilities
 
-# Phase 4（4 周）
+- Discounted spot term \(S e^{-qT}\)
+- Cost-of-carry term \(r-q\)
+- Dividend-aware pricing
+- Dividend-aware Greeks
+- Dividend-aware implied-volatility inversion
+- Backwards-compatible `dividend_yield=0.0` API
 
-## Greeks Engine
+### Validation
 
-研究：
+- Black–Scholes–Merton put-call parity
+- Dividend-aware finite-difference Greeks
+- Dividend-aware implied-volatility round trips
+- Zero-volatility forward payoff
+- Dividend-aware no-arbitrage bounds
 
-Portfolio Greeks。
+### Status
 
-例如：
-
-```
-Net Delta
-
-Net Gamma
-
-Net Vega
-
-Net Theta
-```
-
-然后：
-
-画 Exposure。
+**Complete**
 
 ---
 
-# Phase 5（6 周）
+## Stage 1.5 — Binomial Tree Pricing
 
-## Option Strategy Library
+### Scope
 
-实现：
+Introduce the first general-purpose numerical pricing method using the Cox–Ross–Rubinstein tree.
 
-Covered Call
+### Planned Capabilities
 
-Protective Put
+- European call and put pricing
+- American call and put pricing
+- Continuous dividend yield
+- Early-exercise detection
+- Configurable tree depth
+- Memory-efficient backward induction
+- Optional exercise-boundary extraction
 
-Bull Spread
+### Validation
 
-Bear Spread
+- European tree convergence to Black–Scholes–Merton
+- American option value greater than or equal to European value
+- Non-dividend-paying American call equivalence
+- Intrinsic-value lower bounds
+- Early-exercise behaviour for American puts
+- Stability across moneyness and maturity
+- Convergence behaviour across tree depths
 
-Butterfly
+### Completion Criteria
 
-Iron Condor
+- European prices converge within documented tolerances
+- American exercise logic is independently tested
+- Complexity and numerical limitations are documented
+- Public API remains consistent with the analytical pricing layer
 
-Straddle
+### Status
 
-Strangle
-
-Calendar Spread
-
-全部：
-
-自动：
-
-画：
-
-PnL。
-
-Greeks。
-
-Payoff。
-
----
-
-# Phase 6（6 周）
-
-## Strategy Research
-
-开始回答真正的问题。
-
-例如：
-
-Question 1
-
-什么时候：
-
-Iron Condor
-
-胜率最高？
+**Planned**
 
 ---
 
-Question 2
+## Stage 1.6 — Monte Carlo Pricing
 
-什么时候：
+### Scope
 
-Long Gamma
+Develop a reusable simulation framework for pricing and sensitivity estimation.
 
-赚钱？
+### Planned Capabilities
 
----
+- Geometric Brownian motion path generation
+- European option pricing
+- Antithetic variates
+- Control variates
+- Standard-error estimation
+- Confidence intervals
+- Reproducible random seeds
+- Vectorised simulation
+- Batch pricing
+- Path-dependent payoff interface
 
-Question 3
+### Validation
 
-IV Rank
+- Convergence to Black–Scholes–Merton prices
+- Confidence-interval coverage
+- Error reduction from variance-reduction methods
+- Reproducibility tests
+- Comparison against binomial and analytical prices
 
-有没有预测力？
+### Status
 
----
-
-Question 4
-
-IV Crush
-
-发生在哪里？
-
----
-
-Question 5
-
-Earnings 前后：
-
-IV 如何变化？
-
----
-
-每一个：
-
-写 Report。
+**Planned**
 
 ---
 
-# Phase 7（8 周）
+## Stage 1.7 — Numerical Greeks
 
-## Option Market Making
+### Scope
 
-这是核心。
+Provide model-independent Greek estimation for numerical pricers.
 
-建立：
+### Planned Capabilities
 
-Option MM。
+- Bump-and-revalue Delta
+- Gamma
+- Vega
+- Theta
+- Rho
+- Adaptive bump sizing
+- Forward, backward, and central differences
+- Common-random-number Monte Carlo Greeks
+- Error diagnostics
 
-包括：
+### Validation
 
-### Quote Engine
+- Comparison against analytical Black–Scholes–Merton Greeks
+- Sensitivity to bump size
+- Numerical stability across moneyness and maturity
+- Monte Carlo estimator variance analysis
 
-Bid
+### Status
 
-Ask
-
-Spread
-
----
-
-Inventory
-
-Delta Neutral
-
----
-
-Reservation Price
-
----
-
-Spread Control
+**Planned**
 
 ---
 
-Inventory Penalty
+# Stage 2 — Market Data Infrastructure
+
+## Objective
+
+Create a clean and reproducible pipeline for transforming raw option-chain data into research-ready inputs.
 
 ---
 
-Risk Limit
+## Stage 2.1 — Market Data Models
+
+### Planned Capabilities
+
+- Underlying quote representation
+- Option contract representation
+- Option quote representation
+- Expiry and strike organisation
+- Bid, ask, midpoint, and spread calculations
+- Timestamp and exchange metadata
+- Contract validation
+- Call-put pairing
+
+### Status
+
+**Planned**
 
 ---
 
-PnL Attribution
+## Stage 2.2 — Data Ingestion
+
+### Planned Capabilities
+
+- CSV and Parquet ingestion
+- Extensible provider adapters
+- Schema normalisation
+- Type validation
+- Missing-value handling
+- Duplicate detection
+- Raw-data preservation
+- Reproducible processed datasets
+
+### Status
+
+**Planned**
 
 ---
 
-模拟：
+## Stage 2.3 — Quote Cleaning
 
-10000 天。
+### Planned Capabilities
 
----
+- Invalid bid-ask detection
+- Crossed-market filtering
+- Zero-liquidity filtering
+- Stale-quote detection
+- Minimum-price and minimum-size filters
+- Moneyness and maturity filters
+- Static-arbitrage diagnostics
+- Configurable cleaning rules
 
-# Phase 8（8 周）
+### Status
 
-## Hedging
-
-Delta Hedging
-
-Gamma Hedging
-
-Vega Hedging
-
-Transaction Cost
-
-Slippage
-
-研究：
-
-多久 Hedge 一次最好。
+**Planned**
 
 ---
 
-# Phase 9（8 周）
+## Stage 2.4 — Rates, Dividends, and Forwards
 
-## ML
+### Planned Capabilities
 
-开始 ML。
+- Discount-factor representation
+- Yield-curve interpolation
+- Continuous and discrete dividend handling
+- Forward-price estimation
+- Put-call-parity implied forwards
+- Borrow and carry diagnostics
 
-预测：
+### Status
 
-IV
-
-Vol Surface
-
-Fill Probability
-
-Execution
-
-Order Flow
-
-不用 RL。
-
-先把传统做好。
+**Planned**
 
 ---
 
-# Phase 10（长期）
+# Stage 3 — Volatility Research
 
-真正做 Research。
+## Objective
 
-例如：
-
-论文：
-
-```
-NCX Derivatives Research #1
-
-Why Does IV Smile Change Around Earnings?
-```
+Transform cleaned option prices into consistent implied-volatility structures and research tools.
 
 ---
 
-论文：
+## Stage 3.1 — Implied Volatility Chains
 
-```
-Research #2
+### Planned Capabilities
 
-Dynamic Delta Hedging under Transaction Costs
-```
+- Chain-wide implied-volatility calculation
+- Bid, ask, and midpoint implied volatility
+- Solver diagnostics
+- Failed-inversion reporting
+- Vega-aware filtering
+- Moneyness transformations
+- Forward log-moneyness
 
----
+### Status
 
-论文：
-
-```
-Research #3
-
-Market Making with Inventory Constraints
-```
+**Planned**
 
 ---
 
-论文：
+## Stage 3.2 — Smile and Skew Analysis
 
-```
-Research #4
+### Planned Capabilities
 
-Predicting Volatility Surface using Machine Learning
-```
+- Volatility smile visualisation
+- Strike skew
+- Delta-based skew
+- Risk reversals
+- Butterflies
+- Term-structure analysis
+- ATM volatility extraction
+- Skew slope and curvature metrics
 
----
+### Status
 
-# 最终成果
-
-GitHub：
-
-```
-ncx-derivatives/
-└── src/
-    └── ncx_derivatives/
-```
-
-Website：
-
-```
-ncx-derivatives.dev
-```
-
-包含：
-
-- Demo
-- Research
-- Blog
-- Documentation
-- Reports
+**Planned**
 
 ---
 
-# 如果做到这里，你的能力图谱会是：
+## Stage 3.3 — Volatility Surface Construction
 
-| 能力 | 展示方式 |
-|------|---------|
-| 数学 | Black-Scholes、Greeks、随机过程 |
-| 统计 | Volatility Research、假设检验 |
-| Python | 数据处理、分析、自动化 |
-| C++（可后续加入） | 高性能定价或模拟模块 |
-| 金融 | Options、Greeks、风险管理 |
-| Research | 多篇完整研究报告 |
-| 工程能力 | 自动化数据管线、测试、文档 |
-| 沟通 | 技术博客与可视化 |
+### Planned Capabilities
+
+- Strike-expiry grids
+- Interpolation in total variance
+- Forward-moneyness coordinates
+- Missing-data handling
+- Smoothness controls
+- Surface diagnostics
+- Extrapolation policies
+
+### Validation
+
+- Recovery of observed liquid quotes
+- Calendar monotonicity checks
+- Butterfly-arbitrage checks
+- Stability under sparse data
+- Cross-validation across withheld quotes
+
+### Status
+
+**Planned**
 
 ---
 
-## 我还想把目标再提高一点
+## Stage 3.4 — Parametric Volatility Models
 
-不要把目标设成：
+### Planned Capabilities
 
-> **「做一个很厉害的 GitHub Project。」**
+- SVI smile parameterisation
+- SSVI surface construction
+- Calibration objectives
+- Weighted calibration using spreads or Vega
+- Parameter constraints
+- Arbitrage diagnostics
+- Calibration error reporting
 
-把目标设成：
+### Status
 
-> **「做出一个连 DRW、Optiver、SIG、Akuna 的 Trader 或 Researcher 看了都会愿意讨论的研究平台。」**
+**Planned**
 
-这意味着每个模块都要围绕**真实问题**展开，例如：
+---
 
-- 为什么某些股票的 IV Smile 比其他股票更陡？
-- Delta Hedging 的频率如何影响交易成本和风险？
-- 哪些市场环境下某些期权策略表现更稳定？
+## Stage 3.5 — Volatility Dynamics
 
-如果一年后，你不仅有代码，还有一系列基于真实数据的实验、分析和结论，那么这个项目的价值会远远超过一个普通课程项目，也会成为你申请 Quant Trading、Quant Research、Strats 甚至部分 Quant Developer 岗位时最有说服力的代表作。
+### Planned Research
+
+- Realised versus implied volatility
+- Volatility risk premium
+- Sticky-strike behaviour
+- Sticky-delta behaviour
+- Smile dynamics after spot moves
+- Term-structure evolution
+- Event-volatility decomposition
+
+### Status
+
+**Planned**
+
+---
+
+# Stage 4 — Strategy Research
+
+## Objective
+
+Build a reproducible framework for defining, valuing, and analysing option strategies.
+
+---
+
+## Stage 4.1 — Instruments and Positions
+
+### Planned Capabilities
+
+- Option contract objects
+- Underlying positions
+- Cash positions
+- Long and short quantities
+- Contract multipliers
+- Position-level valuation
+- Position-level Greeks
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 4.2 — Multi-Leg Strategies
+
+### Planned Capabilities
+
+- Vertical spreads
+- Straddles
+- Strangles
+- Butterflies
+- Condors
+- Calendars
+- Diagonals
+- Covered positions
+- Custom strategy composition
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 4.3 — Payoff and Scenario Analysis
+
+### Planned Capabilities
+
+- Expiry payoff
+- Mark-to-market P&L
+- Spot-volatility scenario grids
+- Time-decay scenarios
+- Break-even analysis
+- Maximum gain and loss
+- Greek decomposition
+- Transaction-cost assumptions
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 4.4 — Historical Strategy Research
+
+### Planned Capabilities
+
+- Entry and exit rules
+- Option selection rules
+- Rolling logic
+- Position sizing
+- Transaction costs
+- Slippage assumptions
+- Survivorship-safe data handling
+- Performance attribution
+
+### Status
+
+**Planned**
+
+---
+
+# Stage 5 — Portfolio Risk Engine
+
+## Objective
+
+Aggregate instrument-level valuation and sensitivities into portfolio-level risk measures.
+
+---
+
+## Stage 5.1 — Portfolio Valuation
+
+### Planned Capabilities
+
+- Multi-instrument portfolios
+- Net present value
+- Aggregated Greeks
+- Grouping by underlying
+- Grouping by expiry
+- Grouping by strategy
+- Currency-aware valuation architecture
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 5.2 — Scenario Risk
+
+### Planned Capabilities
+
+- Spot shocks
+- Volatility shocks
+- Rate shocks
+- Time-decay shocks
+- Parallel and non-parallel volatility moves
+- Combined stress scenarios
+- Full revaluation
+- Greek approximation comparison
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 5.3 — P&L Attribution
+
+### Planned Capabilities
+
+- Delta contribution
+- Gamma contribution
+- Vega contribution
+- Theta contribution
+- Rho contribution
+- Higher-order residual
+- Realised versus predicted P&L
+- Daily attribution reports
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 5.4 — Statistical Risk
+
+### Planned Capabilities
+
+- Historical Value at Risk
+- Parametric Value at Risk
+- Expected Shortfall
+- Volatility and correlation estimation
+- Stress-period replay
+- Model-risk comparison
+
+### Status
+
+**Planned**
+
+---
+
+# Stage 6 — Electronic Market-Making Simulation
+
+## Objective
+
+Build an event-driven simulation of an options market maker managing quotes, fills, inventory, and risk.
+
+This stage is intended to integrate the pricing, volatility, strategy, and risk components developed earlier.
+
+---
+
+## Stage 6.1 — Market Simulator
+
+### Planned Capabilities
+
+- Event-driven simulation loop
+- Underlying-price process
+- Option fair-value updates
+- Bid and ask quotes
+- Order arrivals
+- Probabilistic or queue-based fills
+- Position and cash accounting
+- Configurable latency assumptions
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 6.2 — Quoting Engine
+
+### Planned Capabilities
+
+- Fair-value-based quoting
+- Minimum spread
+- Volatility-aware spread
+- Liquidity-aware spread
+- Inventory skew
+- Delta-risk skew
+- Quote-size control
+- Quote refresh logic
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 6.3 — Hedging Engine
+
+### Planned Capabilities
+
+- Delta hedging
+- Threshold-based hedging
+- Periodic hedging
+- Transaction costs
+- Hedge slippage
+- Hedge latency
+- Residual risk tracking
+- Comparison of hedging policies
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 6.4 — Inventory and Risk Controls
+
+### Planned Capabilities
+
+- Position limits
+- Delta limits
+- Gamma limits
+- Vega limits
+- Loss limits
+- Quote widening
+- Quote withdrawal
+- Kill-switch logic
+- Risk-aware size reduction
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 6.5 — Market-Making Evaluation
+
+### Planned Metrics
+
+- Gross and net P&L
+- Spread capture
+- Hedge P&L
+- Inventory P&L
+- Adverse selection
+- Transaction costs
+- Risk-adjusted returns
+- Maximum drawdown
+- Inventory utilisation
+- Fill rate
+- Quote competitiveness
+
+### Planned Experiments
+
+- Symmetric versus inventory-skewed quoting
+- Different hedge thresholds
+- Different volatility regimes
+- Spread-width sensitivity
+- Latency sensitivity
+- Informed versus uninformed order flow
+- Risk-limit effectiveness
+
+### Status
+
+**Planned**
+
+---
+
+# Stage 7 — Advanced Models and Research
+
+## Objective
+
+Extend the platform beyond the initial Black–Scholes–Merton assumptions.
+
+Potential areas will be prioritised based on the maturity of the earlier stages.
+
+---
+
+## Candidate Extensions
+
+### Pricing Models
+
+- Local volatility
+- Heston stochastic volatility
+- Merton jump diffusion
+- SABR
+- Finite-difference PDE methods
+- Least-Squares Monte Carlo
+- Fourier pricing methods
+
+### Products
+
+- Barrier options
+- Asian options
+- Digital options
+- Lookback options
+- Bermudan options
+- Variance swaps
+- Volatility swaps
+
+### Market Microstructure
+
+- Limit-order-book simulation
+- Queue-position modelling
+- Adverse-selection models
+- Order-flow imbalance
+- Multi-venue execution
+- Latency and stale-quote risk
+
+### Research Infrastructure
+
+- Calibration pipelines
+- Experiment tracking
+- Reproducible reports
+- Benchmark datasets
+- Performance profiling
+- Parallel computation
+- Optional compiled acceleration
+
+### Status
+
+**Exploratory**
+
+---
+
+# Cross-Cutting Engineering Work
+
+The following work applies throughout all stages rather than belonging to a single milestone.
+
+## Documentation
+
+- Public API documentation
+- Mathematical assumptions
+- Formula and unit conventions
+- Usage examples
+- Numerical limitations
+- Research methodology
+- Architecture decisions
+
+## Quality Assurance
+
+- Unit tests
+- Property-based tests
+- Regression tests
+- Numerical convergence tests
+- Cross-model validation
+- Static analysis
+- Type checking
+- Continuous integration
+
+## Performance
+
+Optimisation should occur only after correctness is established.
+
+Potential work includes:
+
+- Profiling
+- Vectorisation
+- Memory reduction
+- Parallel simulation
+- Caching
+- Optional NumPy or compiled backends
+- Benchmark tracking
+
+## Reproducibility
+
+- Fixed random seeds where appropriate
+- Versioned configuration
+- Raw and processed data separation
+- Deterministic test fixtures
+- Documented environment setup
+- Saved experiment outputs
+
+---
+
+# Near-Term Priorities
+
+The immediate development sequence is:
+
+1. Implement Cox–Ross–Rubinstein European pricing
+2. Validate convergence against Black–Scholes–Merton
+3. Add American early-exercise logic
+4. Implement Monte Carlo pricing with uncertainty estimates
+5. Introduce numerical Greek estimators
+6. Begin market-data models and option-chain processing
+
+The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.
+
+---
+
+# Definition of Project Success
+
+NCX Derivatives will be considered successful when it can:
+
+- Price standard European and American derivatives using multiple methods
+- Recover and analyse implied volatility from market quotes
+- Construct and diagnose volatility smiles and surfaces
+- Represent and value multi-leg portfolios
+- Explain portfolio P&L through risk sensitivities
+- Simulate a market maker that quotes, trades, hedges, and controls inventory
+- Produce reproducible quantitative research supported by documented assumptions and automated tests
+
+The final objective is not to reproduce the infrastructure of a full trading firm. It is to build a transparent, technically rigorous miniature derivatives research and market-making stack that demonstrates the mathematical, engineering, and decision-making foundations behind professional options trading.
