@@ -20,54 +20,90 @@ def _validate_inputs(
 
 
 def call_price(
-    S: float,
-    K: float,
-    T: float,
-    r: float,
-    sigma: float,
+    spot: float,
+    strike: float,
+    maturity: float,
+    rate: float,
+    volatility: float,
+    dividend_yield: float = 0.0,
 ) -> float:
     """
-    Black-Scholes European call option price.
+    Black-Scholes-Merton European call option price.
     """
-    _validate_inputs(S, K, T, sigma)
+    _validate_inputs(spot, strike, maturity, volatility)
 
-    if T == 0.0:
-        return max(S - K, 0.0)
-    if sigma == 0.0:
-        discounted_strike = K * exp(-r * T)
-        return max(S - discounted_strike, 0.0)
+    if maturity == 0.0:
+        return max(spot - strike, 0.0)
+    if volatility == 0.0:
+        discounted_strike = strike * exp(-rate * maturity)
+        discounted_spot = spot * exp(-dividend_yield * maturity)
+        return max(discounted_spot - discounted_strike, 0.0)
 
-    d_1 = d1(S, K, T, r, sigma)
-    d_2 = d2(S, K, T, r, sigma)
+    discounted_spot = spot * exp(-dividend_yield * maturity)
+    discounted_strike = strike * exp(-rate * maturity)
+    d_1 = d1(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
+    d_2 = d2(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
 
     return (
-        S * norm_cdf(d_1)
-        - K * exp(-r * T) * norm_cdf(d_2)
+        discounted_spot * norm_cdf(d_1)
+        - discounted_strike * norm_cdf(d_2)
     )
 
 
 def put_price(
-    S: float,
-    K: float,
-    T: float,
-    r: float,
-    sigma: float,
+    spot: float,
+    strike: float,
+    maturity: float,
+    rate: float,
+    volatility: float,
+    dividend_yield: float = 0.0,
 ) -> float:
     """
-    Black-Scholes European put option price.
+    Black-Scholes-Merton European put option price.
     """
-    _validate_inputs(S, K, T, sigma)
+    _validate_inputs(spot, strike, maturity, volatility)
 
-    if T == 0.0:
-        return max(K - S, 0.0)
-    if sigma == 0.0:
-        discounted_strike = K * exp(-r * T)
-        return max(discounted_strike - S, 0.0)
+    if maturity == 0.0:
+        return max(strike - spot, 0.0)
+    if volatility == 0.0:
+        discounted_strike = strike * exp(-rate * maturity)
+        discounted_spot = spot * exp(-dividend_yield * maturity)
+        return max(discounted_strike - discounted_spot, 0.0)
 
-    d_1 = d1(S, K, T, r, sigma)
-    d_2 = d2(S, K, T, r, sigma)
+    discounted_spot = spot * exp(-dividend_yield * maturity)
+    discounted_strike = strike * exp(-rate * maturity)
+    d_1 = d1(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
+    d_2 = d2(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
 
     return (
-        K * exp(-r * T) * norm_cdf(-d_2)
-        - S * norm_cdf(-d_1)
+        discounted_strike * norm_cdf(-d_2)
+        - discounted_spot * norm_cdf(-d_1)
     )

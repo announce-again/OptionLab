@@ -417,6 +417,247 @@ def test_put_rho_matches_central_difference(
         abs=1e-7,
     )
 
+
+def test_greeks_match_finite_differences_with_dividend_yield() -> None:
+    spot = 100.0
+    strike = 100.0
+    maturity = 1.0
+    rate = 0.05
+    volatility = 0.20
+    dividend_yield = 0.02
+
+    spot_step = 1e-4 * spot
+    gamma_step = 1e-3 * spot
+    volatility_step = 1e-5
+    rate_step = 1e-5
+    maturity_step = 1e-5
+
+    numerical_call_delta = (
+        call_price(
+            spot + spot_step,
+            strike,
+            maturity,
+            rate,
+            volatility,
+            dividend_yield,
+        )
+        - call_price(
+            spot - spot_step,
+            strike,
+            maturity,
+            rate,
+            volatility,
+            dividend_yield,
+        )
+    ) / (2.0 * spot_step)
+
+    numerical_put_delta = (
+        put_price(
+            spot + spot_step,
+            strike,
+            maturity,
+            rate,
+            volatility,
+            dividend_yield,
+        )
+        - put_price(
+            spot - spot_step,
+            strike,
+            maturity,
+            rate,
+            volatility,
+            dividend_yield,
+        )
+    ) / (2.0 * spot_step)
+
+    numerical_vega = (
+        call_price(
+            spot,
+            strike,
+            maturity,
+            rate,
+            volatility + volatility_step,
+            dividend_yield,
+        )
+        - call_price(
+            spot,
+            strike,
+            maturity,
+            rate,
+            volatility - volatility_step,
+            dividend_yield,
+        )
+    ) / (2.0 * volatility_step)
+
+    numerical_gamma = (
+        call_price(
+            spot + gamma_step,
+            strike,
+            maturity,
+            rate,
+            volatility,
+            dividend_yield,
+        )
+        - 2.0
+        * call_price(
+            spot,
+            strike,
+            maturity,
+            rate,
+            volatility,
+            dividend_yield,
+        )
+        + call_price(
+            spot - gamma_step,
+            strike,
+            maturity,
+            rate,
+            volatility,
+            dividend_yield,
+        )
+    ) / (gamma_step * gamma_step)
+
+    numerical_call_rho = (
+        call_price(
+            spot,
+            strike,
+            maturity,
+            rate + rate_step,
+            volatility,
+            dividend_yield,
+        )
+        - call_price(
+            spot,
+            strike,
+            maturity,
+            rate - rate_step,
+            volatility,
+            dividend_yield,
+        )
+    ) / (2.0 * rate_step)
+
+    numerical_put_rho = (
+        put_price(
+            spot,
+            strike,
+            maturity,
+            rate + rate_step,
+            volatility,
+            dividend_yield,
+        )
+        - put_price(
+            spot,
+            strike,
+            maturity,
+            rate - rate_step,
+            volatility,
+            dividend_yield,
+        )
+    ) / (2.0 * rate_step)
+
+    call_maturity_derivative = (
+        call_price(
+            spot,
+            strike,
+            maturity + maturity_step,
+            rate,
+            volatility,
+            dividend_yield,
+        )
+        - call_price(
+            spot,
+            strike,
+            maturity - maturity_step,
+            rate,
+            volatility,
+            dividend_yield,
+        )
+    ) / (2.0 * maturity_step)
+
+    put_maturity_derivative = (
+        put_price(
+            spot,
+            strike,
+            maturity + maturity_step,
+            rate,
+            volatility,
+            dividend_yield,
+        )
+        - put_price(
+            spot,
+            strike,
+            maturity - maturity_step,
+            rate,
+            volatility,
+            dividend_yield,
+        )
+    ) / (2.0 * maturity_step)
+
+    assert call_delta(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    ) == pytest.approx(numerical_call_delta, rel=1e-6, abs=1e-8)
+    assert put_delta(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    ) == pytest.approx(numerical_put_delta, rel=1e-6, abs=1e-8)
+    assert vega(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    ) == pytest.approx(numerical_vega, rel=1e-6, abs=1e-7)
+    assert gamma(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    ) == pytest.approx(numerical_gamma, rel=1e-5, abs=1e-8)
+    assert call_theta(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    ) == pytest.approx(-call_maturity_derivative, rel=1e-6, abs=1e-7)
+    assert put_theta(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    ) == pytest.approx(-put_maturity_derivative, rel=1e-6, abs=1e-7)
+    assert call_rho(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    ) == pytest.approx(numerical_call_rho, rel=1e-6, abs=1e-7)
+    assert put_rho(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    ) == pytest.approx(numerical_put_rho, rel=1e-6, abs=1e-7)
+
 @pytest.mark.parametrize(
     ("spot", "strike", "maturity", "rate", "volatility"),
     [

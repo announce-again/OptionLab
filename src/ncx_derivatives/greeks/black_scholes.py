@@ -32,13 +32,21 @@ def call_delta(
     maturity: float,
     rate: float,
     volatility: float,
+    dividend_yield: float = 0.0,
 ) -> float:
-    """Return the Black-Scholes delta of a European call."""
+    """Return the Black-Scholes-Merton delta of a European call."""
 
     _validate_inputs(spot, strike, maturity, volatility)
 
-    d_1 = d1(spot, strike, maturity, rate, volatility)
-    return norm_cdf(d_1)
+    d_1 = d1(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
+    return exp(-dividend_yield * maturity) * norm_cdf(d_1)
 
 
 def put_delta(
@@ -47,13 +55,21 @@ def put_delta(
     maturity: float,
     rate: float,
     volatility: float,
+    dividend_yield: float = 0.0,
 ) -> float:
-    """Return the Black-Scholes delta of a European put."""
+    """Return the Black-Scholes-Merton delta of a European put."""
 
     _validate_inputs(spot, strike, maturity, volatility)
 
-    d_1 = d1(spot, strike, maturity, rate, volatility)
-    return norm_cdf(d_1) - 1.0
+    d_1 = d1(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
+    return exp(-dividend_yield * maturity) * (norm_cdf(d_1) - 1.0)
 
 
 def gamma(
@@ -62,14 +78,22 @@ def gamma(
     maturity: float,
     rate: float,
     volatility: float,
+    dividend_yield: float = 0.0,
 ) -> float:
-    """Return the Black-Scholes gamma of a European option."""
+    """Return the Black-Scholes-Merton gamma of a European option."""
 
     _validate_inputs(spot, strike, maturity, volatility)
 
-    d_1 = d1(spot, strike, maturity, rate, volatility)
+    d_1 = d1(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
 
-    return norm_pdf(d_1) / (
+    return exp(-dividend_yield * maturity) * norm_pdf(d_1) / (
         spot * volatility * sqrt(maturity)
     )
 
@@ -80,14 +104,27 @@ def vega(
     maturity: float,
     rate: float,
     volatility: float,
+    dividend_yield: float = 0.0,
 ) -> float:
     """Return vega per 1.0 change in volatility."""
 
     _validate_inputs(spot, strike, maturity, volatility)
 
-    d_1 = d1(spot, strike, maturity, rate, volatility)
+    d_1 = d1(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
 
-    return spot * norm_pdf(d_1) * sqrt(maturity)
+    return (
+        spot
+        * exp(-dividend_yield * maturity)
+        * norm_pdf(d_1)
+        * sqrt(maturity)
+    )
 
 
 def call_theta(
@@ -96,29 +133,47 @@ def call_theta(
     maturity: float,
     rate: float,
     volatility: float,
+    dividend_yield: float = 0.0,
 ) -> float:
     """Return annualised market theta of a European call."""
 
     _validate_inputs(spot, strike, maturity, volatility)
 
-    d_1 = d1(spot, strike, maturity, rate, volatility)
-    d_2 = d2(spot, strike, maturity, rate, volatility)
+    d_1 = d1(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
+    d_2 = d2(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
+    discounted_spot = spot * exp(-dividend_yield * maturity)
+    discounted_strike = strike * exp(-rate * maturity)
 
     diffusion_decay = (
-        -spot
+        -discounted_spot
         * norm_pdf(d_1)
         * volatility
         / (2.0 * sqrt(maturity))
     )
 
     discount_decay = (
-        -rate
-        * strike
-        * exp(-rate * maturity)
-        * norm_cdf(d_2)
+        -rate * discounted_strike * norm_cdf(d_2)
     )
 
-    return diffusion_decay + discount_decay
+    dividend_effect = (
+        dividend_yield * discounted_spot * norm_cdf(d_1)
+    )
+
+    return diffusion_decay + discount_decay + dividend_effect
 
 
 def put_theta(
@@ -127,29 +182,47 @@ def put_theta(
     maturity: float,
     rate: float,
     volatility: float,
+    dividend_yield: float = 0.0,
 ) -> float:
     """Return annualised market theta of a European put."""
 
     _validate_inputs(spot, strike, maturity, volatility)
 
-    d_1 = d1(spot, strike, maturity, rate, volatility)
-    d_2 = d2(spot, strike, maturity, rate, volatility)
+    d_1 = d1(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
+    d_2 = d2(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
+    discounted_spot = spot * exp(-dividend_yield * maturity)
+    discounted_strike = strike * exp(-rate * maturity)
 
     diffusion_decay = (
-        -spot
+        -discounted_spot
         * norm_pdf(d_1)
         * volatility
         / (2.0 * sqrt(maturity))
     )
 
     discount_effect = (
-        rate
-        * strike
-        * exp(-rate * maturity)
-        * norm_cdf(-d_2)
+        rate * discounted_strike * norm_cdf(-d_2)
     )
 
-    return diffusion_decay + discount_effect
+    dividend_effect = (
+        -dividend_yield * discounted_spot * norm_cdf(-d_1)
+    )
+
+    return diffusion_decay + discount_effect + dividend_effect
 
 
 def call_rho(
@@ -158,12 +231,20 @@ def call_rho(
     maturity: float,
     rate: float,
     volatility: float,
+    dividend_yield: float = 0.0,
 ) -> float:
     """Return call rho per 1.0 change in interest rate."""
 
     _validate_inputs(spot, strike, maturity, volatility)
 
-    d_2 = d2(spot, strike, maturity, rate, volatility)
+    d_2 = d2(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
 
     return (
         strike
@@ -179,12 +260,20 @@ def put_rho(
     maturity: float,
     rate: float,
     volatility: float,
+    dividend_yield: float = 0.0,
 ) -> float:
     """Return put rho per 1.0 change in interest rate."""
 
     _validate_inputs(spot, strike, maturity, volatility)
 
-    d_2 = d2(spot, strike, maturity, rate, volatility)
+    d_2 = d2(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
 
     return (
         -strike

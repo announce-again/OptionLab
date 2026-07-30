@@ -50,6 +50,51 @@ def test_put_call_parity(
     )
 
 
+@pytest.mark.parametrize(
+    ("spot", "strike", "maturity", "rate", "volatility", "dividend_yield"),
+    [
+        (100.0, 100.0, 1.0, 0.05, 0.20, 0.02),
+        (120.0, 100.0, 0.50, 0.03, 0.30, 0.01),
+        (80.0, 100.0, 2.00, 0.01, 0.40, 0.04),
+        (150.0, 130.0, 0.25, -0.01, 0.15, 0.03),
+    ],
+)
+def test_put_call_parity_with_continuous_dividend_yield(
+    spot: float,
+    strike: float,
+    maturity: float,
+    rate: float,
+    volatility: float,
+    dividend_yield: float,
+) -> None:
+    """European option prices satisfy BSM put-call parity."""
+
+    call = call_price(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
+    put = put_price(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
+
+    discounted_spot = spot * exp(-dividend_yield * maturity)
+    discounted_strike = strike * exp(-rate * maturity)
+
+    assert call - put == pytest.approx(
+        discounted_spot - discounted_strike,
+        abs=1e-10,
+    )
+
+
 def test_call_price_increases_with_spot() -> None:
     """A call becomes more valuable when the underlying price rises."""
 
@@ -108,6 +153,44 @@ def test_option_prices_increase_with_volatility() -> None:
 
     assert high_vol_call > low_vol_call
     assert high_vol_put > low_vol_put
+
+
+def test_dividend_yield_keyword_affects_option_prices() -> None:
+    """Continuous dividends lower calls and raise puts."""
+
+    no_dividend_call = call_price(
+        spot=100.0,
+        strike=100.0,
+        maturity=1.0,
+        rate=0.05,
+        volatility=0.20,
+    )
+    dividend_call = call_price(
+        spot=100.0,
+        strike=100.0,
+        maturity=1.0,
+        rate=0.05,
+        volatility=0.20,
+        dividend_yield=0.02,
+    )
+    no_dividend_put = put_price(
+        spot=100.0,
+        strike=100.0,
+        maturity=1.0,
+        rate=0.05,
+        volatility=0.20,
+    )
+    dividend_put = put_price(
+        spot=100.0,
+        strike=100.0,
+        maturity=1.0,
+        rate=0.05,
+        volatility=0.20,
+        dividend_yield=0.02,
+    )
+
+    assert dividend_call < no_dividend_call
+    assert dividend_put > no_dividend_put
 
 
 @pytest.mark.parametrize(
@@ -174,6 +257,37 @@ def test_zero_volatility_returns_discounted_deterministic_payoff() -> None:
         rate,
         volatility,
     ) == pytest.approx(max(discounted_strike - spot, 0.0))
+
+
+def test_zero_volatility_with_dividend_yield_returns_forward_payoff() -> None:
+    """With dividends, zero-vol pricing uses the prepaid forward."""
+
+    spot = 100.0
+    strike = 105.0
+    maturity = 1.5
+    rate = 0.04
+    volatility = 0.0
+    dividend_yield = 0.02
+
+    discounted_spot = spot * exp(-dividend_yield * maturity)
+    discounted_strike = strike * exp(-rate * maturity)
+
+    assert call_price(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    ) == pytest.approx(max(discounted_spot - discounted_strike, 0.0))
+    assert put_price(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    ) == pytest.approx(max(discounted_strike - discounted_spot, 0.0))
 
 
 @pytest.mark.parametrize(

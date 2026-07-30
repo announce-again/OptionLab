@@ -93,6 +93,58 @@ def test_put_implied_volatility_round_trip(
     )
 
 
+@pytest.mark.parametrize(
+    ("spot", "strike", "maturity", "rate", "volatility", "dividend_yield"),
+    [
+        (100.0, 100.0, 1.0, 0.05, 0.20, 0.02),
+        (140.0, 100.0, 0.50, 0.03, 0.25, 0.01),
+        (70.0, 100.0, 2.00, 0.01, 0.35, 0.04),
+        (100.0, 120.0, 0.25, -0.02, 0.15, 0.03),
+    ],
+)
+def test_implied_volatility_round_trip_with_dividend_yield(
+    spot: float,
+    strike: float,
+    maturity: float,
+    rate: float,
+    volatility: float,
+    dividend_yield: float,
+) -> None:
+    call_market_price = call_price(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
+    put_market_price = put_price(
+        spot,
+        strike,
+        maturity,
+        rate,
+        volatility,
+        dividend_yield,
+    )
+
+    assert call_implied_volatility(
+        call_market_price,
+        spot,
+        strike,
+        maturity,
+        rate,
+        dividend_yield,
+    ) == pytest.approx(volatility, rel=1e-8, abs=1e-8)
+    assert put_implied_volatility(
+        put_market_price,
+        spot,
+        strike,
+        maturity,
+        rate,
+        dividend_yield,
+    ) == pytest.approx(volatility, rel=1e-8, abs=1e-8)
+
+
 def test_implied_volatility_reprices_market_price() -> None:
     spot = 100.0
     strike = 100.0
@@ -139,6 +191,34 @@ def test_lower_bound_price_returns_zero_implied_volatility() -> None:
         strike,
         maturity,
         rate,
+    ) == 0.0
+
+
+def test_dividend_yield_changes_implied_volatility_bounds() -> None:
+    spot = 100.0
+    strike = 105.0
+    maturity = 1.5
+    rate = 0.04
+    dividend_yield = 0.02
+
+    discounted_spot = spot * exp(-dividend_yield * maturity)
+    discounted_strike = strike * exp(-rate * maturity)
+
+    assert call_implied_volatility(
+        max(discounted_spot - discounted_strike, 0.0),
+        spot,
+        strike,
+        maturity,
+        rate,
+        dividend_yield,
+    ) == 0.0
+    assert put_implied_volatility(
+        max(discounted_strike - discounted_spot, 0.0),
+        spot,
+        strike,
+        maturity,
+        rate,
+        dividend_yield,
     ) == 0.0
 
 

@@ -19,12 +19,18 @@ def d1(
     maturity: float,
     rate: float,
     volatility: float,
+    dividend_yield: float = 0.0,
 ) -> float:
     """Calculate the Black-Scholes d1 term."""
 
     numerator = (
         log(spot / strike)
-        + (rate + 0.5 * volatility * volatility) * maturity
+        + (
+            rate
+            - dividend_yield
+            + 0.5 * volatility * volatility
+        )
+        * maturity
     )
     denominator = volatility * sqrt(maturity)
 
@@ -37,6 +43,7 @@ def d2(
     maturity: float,
     rate: float,
     volatility: float,
+    dividend_yield: float = 0.0,
 ) -> float:
     """Calculate the Black-Scholes d2 term."""
 
@@ -46,4 +53,5 @@ def d2(
         maturity,
         rate,
         volatility,
+        dividend_yield,
     ) - volatility * sqrt(maturity)

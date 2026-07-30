@@ -5,7 +5,7 @@ from ncx_derivatives.greeks import vega
 from ncx_derivatives.pricing import call_price, put_price
 
 
-PriceFunction = Callable[[float, float, float, float, float], float]
+PriceFunction = Callable[[float, float, float, float, float, float], float]
 
 
 def _validate_inputs(
@@ -30,6 +30,7 @@ def _no_arbitrage_bounds(
     strike: float,
     maturity: float,
     rate: float,
+    dividend_yield: float,
 ) -> tuple[float, float]:
     if maturity == 0.0:
         payoff = (
@@ -40,11 +41,12 @@ def _no_arbitrage_bounds(
         return payoff, payoff
 
     discounted_strike = strike * exp(-rate * maturity)
+    discounted_spot = spot * exp(-dividend_yield * maturity)
 
     if option_type == "call":
-        return max(spot - discounted_strike, 0.0), spot
+        return max(discounted_spot - discounted_strike, 0.0), discounted_spot
 
-    return max(discounted_strike - spot, 0.0), discounted_strike
+    return max(discounted_strike - discounted_spot, 0.0), discounted_strike
 
 
 def _validate_price_bounds(
@@ -79,6 +81,7 @@ def _implied_volatility(
     strike: float,
     maturity: float,
     rate: float,
+    dividend_yield: float,
     price_function: PriceFunction,
     option_type: str,
     *,
@@ -96,6 +99,7 @@ def _implied_volatility(
         strike,
         maturity,
         rate,
+        dividend_yield,
     )
     _validate_price_bounds(
         option_price,
@@ -115,13 +119,33 @@ def _implied_volatility(
     high = 1.0
 
     while high < max_volatility:
-        if price_function(spot, strike, maturity, rate, high) >= option_price:
+        if (
+            price_function(
+                spot,
+                strike,
+                maturity,
+                rate,
+                high,
+                dividend_yield,
+            )
+            >= option_price
+        ):
             break
         high *= 2.0
     else:
         high = max_volatility
 
-    if price_function(spot, strike, maturity, rate, high) < option_price:
+    if (
+        price_function(
+            spot,
+            strike,
+            maturity,
+            rate,
+            high,
+            dividend_yield,
+        )
+        < option_price
+    ):
         raise ValueError("implied volatility exceeds solver upper bound")
 
     sigma = _initial_volatility_guess(
@@ -133,7 +157,14 @@ def _implied_volatility(
     sigma = min(max(sigma, low), high)
 
     for _ in range(max_iterations):
-        model_price = price_function(spot, strike, maturity, rate, sigma)
+        model_price = price_function(
+            spot,
+            strike,
+            maturity,
+            rate,
+            sigma,
+            dividend_yield,
+        )
         price_error = model_price - option_price
 
         if abs(price_error) <= price_tolerance:
@@ -150,7 +181,14 @@ def _implied_volatility(
         next_sigma = 0.5 * (low + high)
 
         if use_newton and sigma > 0.0:
-            option_vega = vega(spot, strike, maturity, rate, sigma)
+            option_vega = vega(
+                spot,
+                strike,
+                maturity,
+                rate,
+                sigma,
+                dividend_yield,
+            )
             if option_vega > 1e-12:
                 newton_sigma = sigma - price_error / option_vega
                 if low < newton_sigma < high:
@@ -167,8 +205,9 @@ def call_implied_volatility(
     strike: float,
     maturity: float,
     rate: float,
+    dividend_yield: float = 0.0,
 ) -> float:
-    """Return Black-Scholes implied volatility for a European call."""
+    """Return Black-Scholes-Merton implied volatility for a European call."""
 
     return _implied_volatility(
         option_price,
@@ -176,6 +215,7 @@ def call_implied_volatility(
         strike,
         maturity,
         rate,
+        dividend_yield,
         call_price,
         "call",
     )
@@ -187,8 +227,9 @@ def put_implied_volatility(
     strike: float,
     maturity: float,
     rate: float,
+    dividend_yield: float = 0.0,
 ) -> float:
-    """Return Black-Scholes implied volatility for a European put."""
+    """Return Black-Scholes-Merton implied volatility for a European put."""
 
     return _implied_volatility(
         option_price,
@@ -196,6 +237,7 @@ def put_implied_volatility(
         strike,
         maturity,
         rate,
+        dividend_yield,
         put_price,
         "put",
     )
