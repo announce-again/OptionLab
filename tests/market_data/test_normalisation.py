@@ -1,8 +1,7 @@
 from datetime import date, datetime, timezone
-from zoneinfo import ZoneInfo
-
 import pytest
 
+from _helpers import require_zoneinfo
 from ncx_derivatives.market_data import (
     ExerciseStyle,
     OptionType,
@@ -82,7 +81,7 @@ def test_normalises_dates_and_datetimes_to_utc() -> None:
 
     eastern_datetime = normalise_datetime_utc(
         "2026-07-30T09:30:00",
-        assume_timezone=ZoneInfo("America/New_York"),
+        assume_timezone=require_zoneinfo("America/New_York"),
     )
     assert eastern_datetime == datetime(2026, 7, 30, 13, 30, tzinfo=timezone.utc)
 

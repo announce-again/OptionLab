@@ -4,6 +4,8 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+.pytest_cache/
+.tmp/
 .venv/
 venv/
 env/
@@ -26,4 +28,3 @@ reports/generated/
 Thumbs.db
 .vscode/
 .idea/
-

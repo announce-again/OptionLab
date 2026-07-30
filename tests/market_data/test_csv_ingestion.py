@@ -1,10 +1,9 @@
 from io import StringIO
 from types import MappingProxyType
 from pathlib import Path
-from zoneinfo import ZoneInfo
-
 import pytest
 
+from _helpers import require_zoneinfo
 from ncx_derivatives.market_data import (
     BuiltinCsvIngestionCode,
     CsvColumnMapping,
@@ -226,7 +225,7 @@ AAPL,2026-08-21,180.0,call,2026-07-30T09:30:00,4.90,5.05
                 bid="bid",
                 ask="ask",
             ),
-            assume_timezone=ZoneInfo("America/New_York"),
+            assume_timezone=require_zoneinfo("America/New_York"),
         ),
     )
 

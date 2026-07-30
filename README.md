@@ -1,23 +1,44 @@
 # NCX Derivatives
 
-A from-scratch quantitative derivatives pricing, volatility, risk, and
-market-making platform.
+A from-scratch quantitative derivatives pricing, market-data, volatility, risk,
+and market-making research platform.
 
 ## Current capabilities
+
+### Pricing and Greeks
 
 - Black-Scholes-Merton European call and put pricing
 - Continuous dividend yield support
 - Analytical Delta, Gamma, Vega, Theta, and Rho
 - Implied volatility inversion with a hybrid Newton-bisection solver
+- No-arbitrage bounds and input validation
+- Finite-difference validation of analytical Greeks
+
+### Monte Carlo and American pricing
+
 - Cox-Ross-Rubinstein binomial tree pricing
 - European and American option support
 - Optional American exercise-boundary extraction
 - Monte Carlo European option pricing
+- Asian option Monte Carlo pricing
 - Standard errors and confidence intervals
 - Antithetic variates and control variates
-- No-arbitrage bounds and input validation
-- Finite-difference validation of analytical Greeks
+
+### Reproducible option market-data pipeline
+
+- Canonical option market-data models
+- Provider-aware CSV ingestion and normalisation
+- Rates, forwards, enrichment, and configurable cleaning
+- Static-arbitrage diagnostics
+- pandas interoperability
+- Deterministic dataset serialisation with manifests and hashes
+
+### Engineering
+
 - Comprehensive automated test coverage with pytest
+
+See [Stage 2 summary](docs/stage_2_summary.md) for the full market-data
+infrastructure overview.
 
 ## Installation
 
@@ -146,6 +167,7 @@ mc_delta = numerical_delta(
 - [x] Stage 1.6d: Monte Carlo variance reduction
 - [x] Stage 1.7: Asian option Monte Carlo pricing
 - [x] Stage 1.8: Numerical Greeks
+- [x] Stage 2: Market data infrastructure
 - [ ] Stage 3: Volatility surfaces
 - [ ] Stage 5: Portfolio risk
 - [ ] Stage 6: Market-making simulation
