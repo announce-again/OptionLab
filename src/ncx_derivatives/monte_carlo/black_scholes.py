@@ -435,11 +435,15 @@ def _geometric_asian_price(
     monitoring_times: tuple[float, ...],
 ) -> float:
     if maturity == 0.0 or volatility == 0.0:
-        deterministic_average = sum(
-            spot * exp((rate - dividend_yield) * time)
-            for time in monitoring_times
-        ) / len(monitoring_times)
-        payoff = _payoff(option_type, deterministic_average, strike)
+        average_time = sum(monitoring_times) / len(monitoring_times)
+        deterministic_geometric_average = spot * exp(
+            (rate - dividend_yield) * average_time
+        )
+        payoff = _payoff(
+            option_type,
+            deterministic_geometric_average,
+            strike,
+        )
         return exp(-rate * maturity) * payoff
 
     count = len(monitoring_times)

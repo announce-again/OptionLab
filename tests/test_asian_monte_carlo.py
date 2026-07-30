@@ -72,6 +72,42 @@ def test_low_volatility_asian_price_matches_deterministic_average() -> None:
     assert result.standard_error == 0.0
 
 
+def test_zero_volatility_control_variate_uses_geometric_average() -> None:
+    spot = 100.0
+    strike = 100.0
+    maturity = 1.0
+    rate = 0.08
+    dividend_yield = 0.01
+    monitoring_dates = (0.25, 0.5, 0.75, 1.0)
+
+    plain = monte_carlo_asian_call_price(
+        spot,
+        strike,
+        maturity,
+        rate,
+        0.0,
+        dividend_yield,
+        monitoring_dates=monitoring_dates,
+        simulations=100,
+        seed=1,
+    )
+    controlled = monte_carlo_asian_call_price(
+        spot,
+        strike,
+        maturity,
+        rate,
+        0.0,
+        dividend_yield,
+        monitoring_dates=monitoring_dates,
+        simulations=100,
+        seed=1,
+        control_variate=True,
+    )
+
+    assert controlled.price == pytest.approx(plain.price)
+    assert controlled.standard_error == 0.0
+
+
 def test_asian_call_decreases_and_put_increases_with_strike() -> None:
     low_strike_call = monte_carlo_asian_call_price(
         100.0,
