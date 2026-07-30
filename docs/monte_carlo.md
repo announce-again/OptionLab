@@ -19,12 +19,14 @@ MonteCarloResult(
 
 - Terminal GBM simulation
 - European call and put pricing
+- Arithmetic-average Asian call and put pricing
 - Continuous dividend yield through drift `r - q`
 - Reproducible seeds
 - Standard error estimation
 - Configurable confidence intervals
 - Antithetic terminal simulation
 - Discounted-underlying control variate
+- Geometric Asian closed-form control variate
 
 ## Numerical Notes
 

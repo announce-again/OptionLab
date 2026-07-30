@@ -374,7 +374,42 @@ Add variance-reduction methods for European option Monte Carlo pricing.
 
 ---
 
-## Stage 1.7 — Numerical Greeks
+## Stage 1.7 — Asian Option Monte Carlo Pricing
+
+### Scope
+
+Use Monte Carlo path simulation to price options without direct vanilla
+closed-form coverage.
+
+### Capabilities
+
+- Arithmetic-average Asian call pricing
+- Arithmetic-average Asian put pricing
+- Discrete monitoring dates
+- Full GBM path simulation
+- Reproducible random seeds
+- `MonteCarloResult` return object
+- Standard errors and confidence intervals
+- Antithetic variates
+- Geometric Asian closed-form control variate
+
+### Validation
+
+- Low-volatility convergence to deterministic average-path payoff
+- Strike monotonicity
+- Non-negative call and put prices
+- Standard-error reduction with larger simulation counts
+- Antithetic variance reduction in standard test cases
+- Geometric-control-variate variance reduction
+- Carefully scoped comparison against same-parameter European calls
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 1.8 — Numerical Greeks
 
 ### Scope
 
