@@ -72,6 +72,13 @@ from .normalisation import (
     standard_option_type_value_map,
 )
 from .provider_configs import cboe_option_intervals_csv_config
+from .static_arbitrage import (
+    StaticArbitrageCode,
+    StaticArbitrageConfig,
+    StaticArbitrageDiagnostic,
+    StaticArbitrageReport,
+    diagnose_static_arbitrage,
+)
 from .validation import (
     BuiltinValidationCode,
     ValidationIssue,
@@ -132,12 +139,17 @@ __all__ = [
     "NoArbitrageBounds",
     "RejectedQuote",
     "RejectionReason",
+    "StaticArbitrageCode",
+    "StaticArbitrageConfig",
+    "StaticArbitrageDiagnostic",
+    "StaticArbitrageReport",
     "ValidationIssue",
     "ValidationReport",
     "ValidationSeverity",
     "absolute_spread",
     "clean_enriched_option_quotes",
     "clean_option_chain",
+    "diagnose_static_arbitrage",
     "validate_option_chain_snapshot",
     "validate_option_contract",
     "validate_option_quote",

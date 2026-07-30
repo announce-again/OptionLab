@@ -1562,6 +1562,56 @@ repair prices.
 - Calendar consistency checks
 - Defer total-variance consistency and surface repair to later volatility stages
 
+### Implemented Capabilities
+
+- `StaticArbitrageCode`
+- `StaticArbitrageConfig`
+- `StaticArbitrageDiagnostic`
+- `StaticArbitrageReport`
+- `diagnose_static_arbitrage`
+- Single-contract European lower and upper bound diagnostics
+- Call-put parity diagnostics using \(C-P=D_r(F-K)\)
+- Same-expiry call and put monotonicity diagnostics
+- Vertical-spread lower and upper bound diagnostics
+- Strike convexity diagnostics
+- Butterfly arbitrage diagnostics
+- Optional heuristic raw-price calendar consistency diagnostics
+- Per-rule tolerances and enable flags
+- Violation amount quantification
+- No price repair or mutation
+
+### Boundary Notes
+
+Stage 2.8 consumes `EnrichedOptionQuote` objects and assumes validation,
+enrichment, and any configured cleaning have already been run. Quotes without a
+midpoint are skipped because there is no observable price to diagnose.
+
+The single-contract bounds use the European bounds carried by
+`EnrichedOptionQuote`. American, Bermudan, or unknown exercise styles do not get
+generic bound diagnostics unless future stages add style-specific theory.
+Call-put parity diagnostics are likewise restricted to European call-put pairs.
+Discounted strike-gap vertical-spread bounds are restricted to European options;
+American, Bermudan, and unknown exercise styles are skipped for that rule.
+
+Cross-contract diagnostics group quotes by the full option family:
+underlying symbol, option type, exercise style, contract multiplier, and
+currency. This avoids comparing different economic contract classes in
+monotonicity, vertical-spread, convexity, butterfly, or calendar checks.
+
+All enriched quotes passed to the diagnostic function must share valuation
+timestamp, valuation date, and spot price. Same-expiry groups must also share
+time to maturity, risk-free discount factor, dividend discount factor, and
+forward price. Mixed enrichment assumptions are rejected instead of being
+silently compared.
+
+Raw-price calendar monotonicity is not generally valid under arbitrary rates,
+dividends, forwards, and exercise styles. The calendar rule is therefore named
+as a heuristic and disabled by default. It does not attempt surface repair or
+total-variance consistency.
+
+One underlying strike-convexity violation may generate both a structural
+convexity diagnostic and its tradable weighted-butterfly interpretation.
+
 ### Core Relationships
 
 European call bounds:
@@ -1590,7 +1640,7 @@ C-P=D_r(F-K)
 
 ### Status
 
-**Planned**
+**Complete**
 
 ---
 
@@ -2204,8 +2254,8 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Begin Stage 2.8 — Static-Arbitrage Diagnostics
-2. Build pandas interoperability
+1. Begin Stage 2.9 — pandas Interoperability
+2. Build serialisation and dataset snapshots
 3. Build chain-wide implied-volatility workflows
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.
