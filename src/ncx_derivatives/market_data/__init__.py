@@ -91,6 +91,15 @@ from .pandas_interop import (
     validation_report_to_records,
 )
 from .provider_configs import cboe_option_intervals_csv_config
+from .serialisation import (
+    DATASET_SCHEMA_VERSION,
+    DatasetManifest,
+    DatasetSnapshotWriteResult,
+    canonical_snapshot_to_json,
+    write_canonical_json,
+    write_market_data_dataset,
+    write_option_chain_csv,
+)
 from .static_arbitrage import (
     StaticArbitrageCode,
     StaticArbitrageConfig,
@@ -161,6 +170,9 @@ __all__ = [
     "CsvIngestionError",
     "CsvIngestionResult",
     "CsvRawRecord",
+    "DATASET_SCHEMA_VERSION",
+    "DatasetManifest",
+    "DatasetSnapshotWriteResult",
     "CarryAssumptions",
     "DiscountFactorCurve",
     "DividendYieldCurve",
@@ -186,6 +198,10 @@ __all__ = [
     "clean_enriched_option_quotes",
     "clean_option_chain",
     "diagnose_static_arbitrage",
+    "canonical_snapshot_to_json",
+    "write_canonical_json",
+    "write_market_data_dataset",
+    "write_option_chain_csv",
     "validate_option_chain_snapshot",
     "validate_option_contract",
     "validate_option_quote",

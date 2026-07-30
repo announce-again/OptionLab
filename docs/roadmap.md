@@ -1734,6 +1734,52 @@ deterministic identifiers.
 - Diagnostic summary
 - Deterministic dataset identifiers
 
+### Implemented Capabilities
+
+- `DATASET_SCHEMA_VERSION`
+- `DatasetManifest`
+- `DatasetSnapshotWriteResult`
+- `canonical_snapshot_to_json(snapshot)`
+- `write_canonical_json(snapshot, path)`
+- `write_option_chain_csv(snapshot, path)`
+- `write_market_data_dataset(...)`
+- Stable canonical JSON payloads
+- Deterministic option-chain CSV export
+- Reproducible dataset directory layout
+- Manifest metadata for schema, source, timestamps, configuration, assumptions,
+  input/canonical/accepted/rejected counts, diagnostic counts, hashes, and
+  dataset ID
+- Optional raw source copying with input hashing
+- Validation, cleaning, and static-arbitrage diagnostic export
+- Typed JSON-compatible metadata canonicalization
+- UTC `Z` datetime canonicalization
+- Standard JSON output with `NaN` and `Infinity` rejected
+- Dataset identity covers canonical, accepted, rejected, diagnostic, raw, and
+  semantic configuration payloads
+
+### Boundary Notes
+
+- Serialisation uses only standard-library JSON, CSV, hashing, and filesystem
+  APIs.
+- pandas remains an optional boundary tool from Stage 2.9 and is not required
+  by dataset serialisation.
+- `processed/canonical_option_chain.csv` records the full canonical snapshot.
+- `processed/accepted_quotes.csv` records cleaning-accepted quotes when a
+  cleaning result is provided, otherwise it mirrors the canonical snapshot.
+- `rejected/rejected_quotes.csv` records one rejected quote per row.
+- `diagnostics/cleaning.json` records one cleaning diagnostic per issue.
+- Dataset identifiers are content hashes over stable serialised payloads and
+  manifest inputs. They are reproducibility identifiers, not market-data vendor
+  identifiers.
+- `ingestion_timestamp` is audit metadata and intentionally excluded from
+  `dataset_id`.
+- `output_hash` hashes canonical logical content, not the physical bytes of
+  output files.
+- The logical content hash includes the full accepted/rejected quote
+  partitions, not only their counts.
+- Configuration metadata requires non-empty string object keys; unsupported or
+  ambiguous key types are rejected instead of silently converted.
+
 ### Target Dataset Layout
 
 ```text
@@ -1741,7 +1787,9 @@ dataset/
     raw/
         source.csv
     processed/
-        option_chain.csv
+        canonical_option_chain.csv
+        canonical_option_chain.json
+        accepted_quotes.csv
     rejected/
         rejected_quotes.csv
     diagnostics/
@@ -1791,7 +1839,7 @@ Example `manifest.json`:
 
 ### Status
 
-**Planned**
+**Complete**
 
 ---
 
@@ -2297,7 +2345,7 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Begin Stage 2.10 — Serialisation and Dataset Snapshots
+1. Begin Stage 3.1 — Implied Volatility Chains
 2. Build chain-wide implied-volatility workflows
 3. Build volatility-surface diagnostics and research workflows
 
