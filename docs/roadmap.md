@@ -1485,6 +1485,51 @@ preserving machine-readable diagnostics for every rejection.
 - Machine-readable rejection reasons such as `CROSSED_MARKET`, `EXCESSIVE_SPREAD`, and `MISSING_BID`
 - No silent list shrinking
 
+### Implemented Capabilities
+
+- `RejectionReason`
+- `CleaningConfig`
+- `CleaningDiagnostic`
+- `RejectedQuote`
+- `CleaningResult`
+- `EnrichedCleaningResult`
+- `clean_option_chain`
+- `clean_enriched_option_quotes`
+- Missing bid and ask rejection
+- Empty market rejection
+- Crossed and locked market policies
+- Zero-midpoint rejection
+- Maximum relative-spread filtering
+- Canonical midpoint and relative-spread filtering without enrichment
+- Minimum volume and open-interest filtering
+- Stale quote filtering
+- Strike-range filtering
+- Maturity-range filtering for enriched quotes
+- Spot- and forward-moneyness filtering for enriched quotes
+- Minimum option-price filtering
+- Deterministic accepted and rejected quote ordering
+- Machine-readable diagnostics for every rejected quote
+
+### Boundary Notes
+
+Stage 2.7 operates on valid canonical objects and enriched quotes. Negative
+quote values and invalid strikes remain constructor-level model invariants from
+Stage 2.1, so they are not normally reachable inside cleaning policies.
+
+Rules that depend on derived fields, such as relative spread, maturity,
+moneyness, and minimum midpoint, are applied through `EnrichedOptionQuote`.
+Rules that only require canonical quotes, such as one-sided markets, crossed or
+locked markets, liquidity thresholds, staleness, and strike ranges, are applied
+directly to `OptionChainSnapshot`.
+
+Canonical cleaning also applies midpoint, relative-spread, and minimum-price
+rules because they can be computed directly from bid and ask. Filters requiring
+maturity or moneyness must use enriched quotes; passing those policies to
+`clean_option_chain` is rejected rather than silently ignored.
+
+Cleaning assumes model validation has already been run. Future-relative
+timestamps are validation issues rather than staleness rejections.
+
 ### Structural Cleaning Note
 
 Some basic structural cleaning may happen before rates and enrichment, including
@@ -1494,7 +1539,7 @@ avoid splitting the roadmap too early.
 
 ### Status
 
-**Planned**
+**Complete**
 
 ---
 
@@ -2159,8 +2204,8 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Begin Stage 2.7 — Cleaning Policies
-2. Build static-arbitrage diagnostics
+1. Begin Stage 2.8 — Static-Arbitrage Diagnostics
+2. Build pandas interoperability
 3. Build chain-wide implied-volatility workflows
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.

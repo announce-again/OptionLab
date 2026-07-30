@@ -1,4 +1,4 @@
-"""Build canonical market-data objects by hand."""
+"""Build a canonical option-chain snapshot manually."""
 
 from datetime import date, datetime, timezone
 
@@ -8,14 +8,12 @@ from ncx_derivatives.market_data import (
     OptionContract,
     OptionQuote,
     OptionType,
-    SourceMetadata,
     UnderlyingQuote,
 )
 
 
 def main() -> None:
-    as_of = datetime(2026, 7, 30, 14, 30, tzinfo=timezone.utc)
-    metadata = SourceMetadata(provider="manual_example")
+    timestamp = datetime(2026, 7, 30, 14, 30, tzinfo=timezone.utc)
 
     call = OptionContract(
         underlying_symbol="AAPL",
@@ -25,9 +23,6 @@ def main() -> None:
         exercise_style=ExerciseStyle.AMERICAN,
         contract_multiplier=100.0,
         currency="USD",
-        source_contract_id="manual-call",
-        display_symbol="AAPL  260821C00180000",
-        metadata=metadata,
     )
     put = OptionContract(
         underlying_symbol="AAPL",
@@ -37,62 +32,47 @@ def main() -> None:
         exercise_style=ExerciseStyle.AMERICAN,
         contract_multiplier=100.0,
         currency="USD",
-        source_contract_id="manual-put",
-        display_symbol="AAPL  260821P00180000",
-        metadata=metadata,
     )
 
     snapshot = OptionChainSnapshot(
         underlying_symbol="AAPL",
-        as_of=as_of,
+        as_of=timestamp,
         quotes=(
             OptionQuote(
                 contract=put,
-                quote_timestamp=as_of,
+                quote_timestamp=timestamp,
                 bid=3.70,
                 ask=3.85,
-                bid_size=10,
-                ask_size=11,
-                open_interest=980,
-                open_interest_date=date(2026, 7, 29),
-                metadata=metadata,
             ),
             OptionQuote(
                 contract=call,
-                quote_timestamp=as_of,
+                quote_timestamp=timestamp,
                 bid=4.90,
                 ask=5.05,
-                bid_size=12,
-                ask_size=15,
-                open_interest=1200,
-                open_interest_date=date(2026, 7, 29),
-                metadata=metadata,
             ),
         ),
         underlying_quote=UnderlyingQuote(
             symbol="AAPL",
-            quote_timestamp=as_of,
+            quote_timestamp=timestamp,
             price=181.22,
             bid=181.20,
             ask=181.24,
-            metadata=metadata,
         ),
-        metadata=metadata,
     )
 
-    print("Snapshot:", snapshot.underlying_symbol, snapshot.as_of.isoformat())
-    print("Quote count:", len(snapshot.quotes))
-    print("Contracts:")
-    for contract in snapshot.contracts:
+    print(f"Underlying: {snapshot.underlying_symbol}")
+    print(f"As of: {snapshot.as_of.isoformat()}")
+    print(f"Quotes: {len(snapshot.quotes)}")
+    print(f"Contracts: {len(snapshot.contracts)}")
+    print(f"Call and put pair: {call.pairing_key == put.pairing_key}")
+
+    for quote in snapshot.quotes:
         print(
-            "-",
-            contract.option_type.value,
-            contract.expiration.isoformat(),
-            contract.strike,
-            contract.display_symbol,
+            quote.contract.option_type.value,
+            quote.contract.strike,
+            quote.bid,
+            quote.ask,
         )
-    print("Pairing key:", call.pairing_key)
-    print("Call and put pair:", call.pairing_key == put.pairing_key)
 
 
 if __name__ == "__main__":
