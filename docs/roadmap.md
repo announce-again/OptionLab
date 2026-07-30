@@ -1145,6 +1145,10 @@ Construct canonical option-chain snapshots rather than DataFrames.
 Handle semantic representation differences across data sources. CSV ingestion
 reads the file; normalisation unifies the meaning.
 
+Stage 2.4 provides reusable source-value normalizers and provider convention
+configurations used before canonical object construction. It does not
+post-process canonical snapshots.
+
 ### Planned Capabilities
 
 - Convert `"C"`, `"CALL"`, and `"call"` to `OptionType.CALL`
@@ -1157,10 +1161,101 @@ reads the file; normalisation unifies the meaning.
 - Normalize contract multipliers
 - Deterministic sorting
 - Provider-specific column conventions
+- Source-value normalisers shared by CSV ingestion
+- Provider convention helpers separated from scalar normalisation
 
 ### Status
 
-**Planned**
+**Complete**
+
+---
+
+## Stage 2.4a — Value Normalisation
+
+### Scope
+
+Normalize source scalar representations into canonical primitive values.
+
+### Capabilities
+
+- Missing-value interpretation
+- Numeric string parsing
+- Integer string parsing
+- Contract multiplier normalization
+- Boolean values rejected as numeric inputs
+- Strict integer parsing without truncating decimal strings
+- Defensive value-map helpers
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.4b — Enum and Text Normalisation
+
+### Scope
+
+Normalize common option-market text representations.
+
+### Capabilities
+
+- `"C"`, `"CALL"`, and `"call"` to `OptionType.CALL`
+- `"P"`, `"PUT"`, and `"put"` to `OptionType.PUT`
+- Trim and case-fold before enum alias lookup
+- Standard exercise-style representations
+- Symbol normalization
+- Exchange normalization
+- Symbol and exchange normalization are syntactic trim-and-uppercase only, not
+  identity resolution
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.4c — Date and Timestamp Normalisation
+
+### Scope
+
+Normalize source date and timestamp representations.
+
+### Capabilities
+
+- ISO date parsing
+- Datetime inputs rejected by date normalisation unless handled explicitly by a
+  datetime normaliser
+- Expiration date normalization without silent datetime truncation
+- ISO datetime parsing
+- `Z` suffix handling
+- Naive datetime timezone assumption
+- UTC timestamp output
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.4d — CSV Convention Helpers
+
+### Scope
+
+Use normalisation helpers to define explicit provider-style CSV conventions
+without moving parsing logic into provider adapters.
+
+### Capabilities
+
+- Standard option-type value map
+- Standard exercise-style value map
+- Cboe-style option interval CSV config helper
+- Optional open-interest and calculated-underlying field variants
+- Integration with Stage 2.3 CSV ingestion
+
+### Status
+
+**Complete**
 
 ---
 
@@ -1957,8 +2052,8 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Begin Stage 2.4 — Normalisation
-2. Build rates, dividends, and forwards
+1. Begin Stage 2.5 — Rates, Dividends, and Forwards
+2. Build derived fields and year fractions
 3. Build chain-wide implied-volatility workflows
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.

@@ -1,9 +1,4 @@
-"""Validate a canonical option-chain snapshot.
-
-This example uses explicit canonical models.
-
-Provider normalisation is introduced in Stage 2.4.
-"""
+"""Validate a canonical option-chain snapshot."""
 
 from datetime import date, datetime, timezone
 
@@ -75,4 +70,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -1,9 +1,4 @@
-"""Build canonical market-data objects by hand.
-
-This example uses explicit canonical models.
-
-Provider normalisation is introduced in Stage 2.4.
-"""
+"""Build canonical market-data objects by hand."""
 
 from datetime import date, datetime, timezone
 
@@ -102,4 +97,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

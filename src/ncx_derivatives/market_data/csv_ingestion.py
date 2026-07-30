@@ -17,9 +17,13 @@ from .models import (
     SourceMetadata,
     UnderlyingQuote,
 )
-
-
-DEFAULT_MISSING_VALUES = frozenset({"", "NA", "N/A", "NULL", "NONE", "NAN"})
+from .normalisation import (
+    DEFAULT_MISSING_VALUES,
+    normalise_date,
+    normalise_datetime_utc,
+    normalise_float,
+    normalise_int,
+)
 
 
 class BuiltinCsvIngestionCode(str, Enum):
@@ -504,9 +508,12 @@ def _float(
 ) -> float:
     value = _required_text(raw_record, column, config)
     try:
-        return float(value)
+        parsed = normalise_float(value)
     except ValueError as error:
-        raise ValueError(f"{column}: invalid float value {value!r}") from error
+        raise ValueError(f"{column}: {error}") from error
+    if parsed is None:
+        raise ValueError(f"{column}: required value is missing")
+    return parsed
 
 
 def _optional_float(
@@ -518,9 +525,9 @@ def _optional_float(
     if value is None:
         return None
     try:
-        return float(value)
+        return normalise_float(value)
     except ValueError as error:
-        raise ValueError(f"{column}: invalid float value {value!r}") from error
+        raise ValueError(f"{column}: {error}") from error
 
 
 def _optional_int(
@@ -532,9 +539,9 @@ def _optional_int(
     if value is None:
         return None
     try:
-        return int(value)
+        return normalise_int(value)
     except ValueError as error:
-        raise ValueError(f"{column}: invalid integer value {value!r}") from error
+        raise ValueError(f"{column}: {error}") from error
 
 
 def _date(
@@ -544,9 +551,12 @@ def _date(
 ) -> date:
     value = _required_text(raw_record, column, config)
     try:
-        return date.fromisoformat(value)
+        parsed = normalise_date(value)
     except ValueError as error:
-        raise ValueError(f"{column}: invalid ISO date value {value!r}") from error
+        raise ValueError(f"{column}: {error}") from error
+    if parsed is None:
+        raise ValueError(f"{column}: required value is missing")
+    return parsed
 
 
 def _optional_date(
@@ -558,9 +568,9 @@ def _optional_date(
     if value is None:
         return None
     try:
-        return date.fromisoformat(value)
+        return normalise_date(value)
     except ValueError as error:
-        raise ValueError(f"{column}: invalid ISO date value {value!r}") from error
+        raise ValueError(f"{column}: {error}") from error
 
 
 def _datetime(
@@ -571,15 +581,12 @@ def _datetime(
     if column is None:
         raise ValueError("datetime column is required")
     value = _required_text(raw_record, column, config)
-    normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
     try:
-        parsed = datetime.fromisoformat(normalized)
+        parsed = normalise_datetime_utc(value, config.assume_timezone)
     except ValueError as error:
-        raise ValueError(
-            f"{column}: invalid ISO datetime value {value!r}",
-        ) from error
-    if parsed.tzinfo is None or parsed.utcoffset() is None:
-        parsed = parsed.replace(tzinfo=config.assume_timezone)
+        raise ValueError(f"{column}: {error}") from error
+    if parsed is None:
+        raise ValueError(f"{column}: required value is missing")
     return parsed
 
 
