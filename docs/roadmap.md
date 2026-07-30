@@ -444,22 +444,262 @@ Provide model-independent Greek estimation for numerical pricers.
 
 ## Objective
 
-Create a clean and reproducible pipeline for transforming raw option-chain data into research-ready inputs.
+Create a clean and reproducible pipeline for transforming raw option-chain data into canonical, validated, research-ready inputs.
 
 ---
 
-## Stage 2.1 — Market Data Models
+## Stage 2.0 — Data Source Reconnaissance and Fixtures
+
+### Scope
+
+Collect and study a small set of real option-chain samples before committing
+to the canonical schema or ingestion APIs.
 
 ### Planned Capabilities
 
+- Identify 2-4 option-chain data formats
+- Compare fields, missing values, and abnormal quote cases
+- Save deterministic fixtures for tests and design validation
+- Include at least one normal complete chain
+- Include data with missing bid or ask values
+- Include data with crossed quotes, zero volume, or similar quality problems
+- Include a complete chain with multiple expiries, calls, and puts
+- Include at least one provider format for cross-source comparison
+- Infer the canonical schema from observed source differences
+- Avoid any dependency on live APIs at this stage
+
+### Fields to Investigate
+
+- Underlying symbol
+- Option symbol
+- Expiration
+- Strike
+- Call or put type
+- Bid
+- Ask
+- Last
+- Volume
+- Open interest
+- Implied volatility
+- Quote timestamp
+- Trade timestamp
+- Underlying spot
+- Exchange
+- Contract multiplier
+- Exercise style
+- Currency
+
+### Source Differences to Record
+
+- Whether expiration is represented as a date or datetime
+- Whether timestamps include timezone information
+- Whether implied volatility is represented as `0.25` or `25`
+- Whether option type is represented as `C`/`P` or `call`/`put`
+- Whether missing values use empty strings, `null`, `0`, or `NaN`
+- Whether zero bid or ask means a real quote or missing data
+- Whether null order-book prices use provider-specific sentinel values
+- Whether spot is repeated on each row or supplied separately
+- Whether contract symbols can be parsed reliably
+- Whether volume is interval, session, previous-session, or otherwise
+  aggregated
+- Whether exchange-like fields mean listing exchange, quote venue, trade venue,
+  publisher, or dataset
+
+### Status Progression
+
+Stage 2.0 should not jump directly from `Planned` to `Completed`. It should
+move through explicit reconnaissance checkpoints:
+
+```text
+Planned
+ ↓
+In Progress
+ ↓
+Fixtures Collected
+ ↓
+Schema Requirements Finalised
+ ↓
+Completed
+```
+
+### Status
+
+**Complete**
+
+Current checkpoints:
+
+- Source Selection Complete
+- Field Survey Complete
+- Fixtures Collected
+- Schema Requirements Finalised
+- Fixture Integrity Checks Passing
+
+---
+
+## Stage 2.0a — Source Selection and Field Survey
+
+### Scope
+
+Select representative option-chain source formats and document their field
+structure before writing formal ingestion code.
+
+### Planned Capabilities
+
+- Select 2-4 materially different option-chain formats
+- Prefer structural diversity over provider count alone
+- Include at least one flat interval format with one row per contract per
+  observation time
+- Include at least one nested or separated format, where available
+- Compare field names, types, units, and missing-value conventions
+- Record timestamp, timezone, symbol, IV, and bid-ask conventions
+- Identify which fields are canonical, optional canonical, source metadata, derived, or ignored
+- Capture unresolved schema decisions for Stage 2.1
+- Avoid production ingestion APIs, live downloads, credentials, and provider SDK dependencies
+
+### Deliverables
+
+- Source selection notes
+- Source-to-canonical field survey table
+- Missing-value and unit convention notes
+- Initial list of fixture candidates
+- Open schema questions for Stage 2.1
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.0b — Fixture Construction
+
+### Scope
+
+Construct a small deterministic fixture set from the selected source formats
+before implementing canonical models or ingestion code.
+
+### Planned Capabilities
+
+- Cboe-style interval CSV fixtures
+- Massive/Polygon-style nested snapshot JSON fixtures
+- Databento-style separated definitions, BBO, and statistics CSV fixtures
+- Normal complete chain examples
+- Synthetic quality-case examples
+- Missing optional nested-field examples
+- Pagination metadata examples
+- Separated-schema join examples using `instrument_id`
+- Databento-style null-price sentinel and converted-`NaN` examples
+- Explicit labels distinguishing synthetic mutations from observed source
+  structure
+
+### Target Fixture Layout
+
+```text
+tests/fixtures/market_data/
+    cboe_intervals/
+        normal.csv
+        synthetic_quality_cases.csv
+    massive_snapshot/
+        normal.json
+        missing_optional_fields.json
+    databento_separated/
+        definitions.csv
+        bbo.csv
+        statistics.csv
+```
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.0c — Fixture Provenance
+
+### Scope
+
+Document source inspiration, reconstruction choices, synthetic mutations, and
+licensing constraints for every fixture.
+
+### Planned Capabilities
+
+- Fixture provenance notes
+- Source documentation references
+- Synthetic mutation labels
+- Redistribution and licensing notes
+- Distinction between observed source structure and fabricated market values
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.0d — Canonical Schema Requirements
+
+### Scope
+
+Convert the source survey and fixture observations into explicit requirements
+for Stage 2.1 canonical market-data models.
+
+### Planned Capabilities
+
+- Required canonical fields
+- Optional canonical fields
+- Source metadata fields
+- Derived fields to exclude from raw canonical models
+- Volume aggregation semantics
+- Open-interest reference-date semantics
+- Exchange and venue semantics
+- Contract identity requirements
+- Remaining unresolved design decisions for Stage 2.1
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.0e — Fixture Integrity Checks
+
+### Scope
+
+Protect the Stage 2.0b fixtures from accidental structural drift without
+implementing production ingestion.
+
+### Planned Capabilities
+
+- CSV header and row-shape checks
+- JSON structural checks
+- Cboe multi-observation-time checks
+- Massive optional-field and pagination checks
+- Databento `instrument_id` join checks
+- Databento null-price sentinel checks
+- Open-interest reference-date checks
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.1 — Canonical Market Data Models
+
+### Scope
+
+Establish the shared domain language for option-market data. This stage
+defines what the data is; it does not handle CSV parsing, cleaning, or pandas.
+
+### Planned Capabilities
+
+- `OptionType`
+- `ExerciseStyle`
+- `OptionContract`
+- `OptionQuote`
 - Underlying quote representation
-- Option contract representation
-- Option quote representation
-- Expiry and strike organisation
-- Bid, ask, midpoint, and spread calculations
-- Timestamp and exchange metadata
-- Contract validation
-- Call-put pairing
+- Option-chain snapshot representation
+- Timestamp, exchange, and data-source metadata
+- Contract identity, deterministic sorting, and hashing
+- Canonical keys needed for call-put pairing
 
 ### Status
 
@@ -467,18 +707,27 @@ Create a clean and reproducible pipeline for transforming raw option-chain data 
 
 ---
 
-## Stage 2.2 — Data Ingestion
+## Stage 2.2 — Validation Framework
+
+### Scope
+
+Build structured, reusable validation that separates fatal structural errors
+from data-quality warnings.
 
 ### Planned Capabilities
 
-- CSV and Parquet ingestion
-- Extensible provider adapters
-- Schema normalisation
-- Type validation
-- Missing-value handling
+- Field-level validation
+- Record-level validation
+- Snapshot-level validation
+- `ValidationSeverity.ERROR`
+- `ValidationSeverity.WARNING`
+- `ValidationSeverity.INFO`
+- Structured validation issues
+- Validation reports
 - Duplicate detection
-- Raw-data preservation
-- Reproducible processed datasets
+- Inconsistent underlying detection
+- Timestamp consistency checks
+- Avoid representing every issue as a direct `ValueError`
 
 ### Status
 
@@ -486,18 +735,32 @@ Create a clean and reproducible pipeline for transforming raw option-chain data 
 
 ---
 
-## Stage 2.3 — Quote Cleaning
+## Stage 2.3 — CSV Ingestion
+
+### Scope
+
+Convert external CSV files into canonical market-data snapshots.
+
+```text
+CSV
+ ↓
+raw records
+ ↓
+parsed canonical objects
+```
 
 ### Planned Capabilities
 
-- Invalid bid-ask detection
-- Crossed-market filtering
-- Zero-liquidity filtering
-- Stale-quote detection
-- Minimum-price and minimum-size filters
-- Moneyness and maturity filters
-- Static-arbitrage diagnostics
-- Configurable cleaning rules
+- CSV schema definition
+- Column mapping
+- Required and optional columns
+- Numeric parsing
+- Date and datetime parsing
+- Missing-value interpretation
+- Row-level ingestion errors
+- Raw-row preservation
+- Deterministic ordering
+- Canonical snapshot output rather than DataFrame output
 
 ### Status
 
@@ -505,16 +768,316 @@ Create a clean and reproducible pipeline for transforming raw option-chain data 
 
 ---
 
-## Stage 2.4 — Rates, Dividends, and Forwards
+## Stage 2.4 — Normalisation
+
+### Scope
+
+Handle semantic representation differences across data sources. CSV ingestion
+reads the file; normalisation unifies the meaning.
 
 ### Planned Capabilities
 
-- Discount-factor representation
-- Yield-curve interpolation
-- Continuous and discrete dividend handling
+- Convert `"C"`, `"CALL"`, and `"call"` to `OptionType.CALL`
+- Convert `"P"`, `"PUT"`, and `"put"` to `OptionType.PUT`
+- Normalize timestamps to UTC
+- Normalize expirations to dates
+- Convert numeric strings to numeric values
+- Convert empty strings, `"NA"`, and `"null"` to `None`
+- Normalize exchange and symbol values
+- Normalize contract multipliers
+- Deterministic sorting
+- Provider-specific column conventions
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 2.5 — Rates, Dividends, and Forwards
+
+### Scope
+
+Introduce rate, dividend, and forward-price assumptions before derived fields,
+research cleaning, and arbitrage diagnostics depend on them.
+
+### Planned Capabilities
+
+- `DiscountFactorCurve`
+- `ZeroRateCurve`
+- `DividendYieldCurve`
+- Flat-rate implementations
+- Interpolation policy
+- Discount-factor lookup
 - Forward-price estimation
-- Put-call-parity implied forwards
-- Borrow and carry diagnostics
+- Carry representation
+- Initial support for flat continuously compounded curves, with term structures left as an extension
+
+### Core Relationships
+
+\[
+D_r(T)=e^{-rT}
+\]
+
+\[
+D_q(T)=e^{-qT}
+\]
+
+\[
+F(T)=S\frac{D_q(T)}{D_r(T)}
+\]
+
+For flat continuously compounded rates:
+
+\[
+F(T)=Se^{(r-q)T}
+\]
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 2.6 — Derived Fields and Year Fractions
+
+### Scope
+
+Compute research fields from canonical quotes without mutating the original
+quote objects.
+
+### Planned Capabilities
+
+- `ACT/365F` year fractions
+- `ACT/360` year fractions
+- Extensible day-count interface
+- Midpoint
+- Absolute spread
+- Relative spread
+- Time to maturity
+- Discount factor
+- Forward price
+- Spot moneyness
+- Forward moneyness
+- Log-moneyness
+- Intrinsic value
+- Time value
+- No-arbitrage lower and upper bounds
+- Independent enriched quote object, for example `EnrichedOptionQuote`
+
+### Core Relationships
+
+\[
+M_{\text{spot}}=\frac{S}{K}
+\]
+
+\[
+M_{\text{forward}}=\frac{F}{K}
+\]
+
+\[
+k=\ln\left(\frac{K}{F}\right)
+\]
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 2.7 — Cleaning Policies
+
+### Scope
+
+Apply configurable cleaning policies to canonical and enriched data while
+preserving machine-readable diagnostics for every rejection.
+
+### Planned Capabilities
+
+- Missing bid or ask handling
+- Negative quote detection
+- Crossed-market detection
+- Locked-market detection
+- Zero-midpoint detection
+- Maximum relative-spread filtering
+- Minimum volume filtering
+- Minimum open-interest filtering
+- Stale-quote filtering
+- Maturity-range filtering
+- Strike-range filtering
+- Spot-moneyness filtering
+- Forward-moneyness filtering
+- Minimum option-price filtering
+- Configurable policy composition
+- `CleaningResult` with accepted quotes, rejected quotes, and diagnostics
+- Machine-readable rejection reasons such as `CROSSED_MARKET`, `EXCESSIVE_SPREAD`, and `MISSING_BID`
+- No silent list shrinking
+
+### Structural Cleaning Note
+
+Some basic structural cleaning may happen before rates and enrichment, including
+negative bid or ask values, `bid > ask`, missing contract identity, and invalid
+strike. Development order should still follow Stage 2.1 through Stage 2.10 to
+avoid splitting the roadmap too early.
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 2.8 — Static-Arbitrage Diagnostics
+
+### Scope
+
+Detect, report, and quantify static-arbitrage issues after canonical data,
+rates, forwards, and derived fields exist. This stage should not automatically
+repair prices.
+
+### Planned Capabilities
+
+- Single-contract lower and upper bound checks
+- Call-put parity diagnostics
+- Same-expiry monotonicity across strikes
+- Same-expiry convexity across strikes
+- Vertical-spread bound checks
+- Butterfly-arbitrage diagnostics
+- Calendar consistency checks
+- Defer total-variance consistency and surface repair to later volatility stages
+
+### Core Relationships
+
+European call bounds:
+
+\[
+\max(SD_q-KD_r,0)\le C\le SD_q
+\]
+
+European put bounds:
+
+\[
+\max(KD_r-SD_q,0)\le P\le KD_r
+\]
+
+Call-put parity:
+
+\[
+C-P=SD_q-KD_r
+\]
+
+Equivalently:
+
+\[
+C-P=D_r(F-K)
+\]
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 2.9 — pandas Interoperability
+
+### Scope
+
+Add pandas only after the domain layer is stable. pandas is a boundary-layer
+tool, not the internal market-data model.
+
+### Planned Capabilities
+
+- Snapshot to records
+- Records to snapshot
+- Snapshot to DataFrame
+- DataFrame to snapshot
+- Enriched quotes to DataFrame
+- Diagnostics to DataFrame
+- Cleaning report to DataFrame
+- APIs such as `option_chain_to_dataframe(snapshot)` and `option_chain_from_dataframe(frame)`
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 2.10 — Serialisation and Dataset Snapshots
+
+### Scope
+
+Produce reproducible canonical datasets with metadata, diagnostics, and
+deterministic identifiers.
+
+### Planned Capabilities
+
+- Canonical JSON output
+- CSV export
+- Metadata manifest
+- Schema version
+- Source information
+- Ingestion timestamp
+- Valuation timestamp
+- Normalisation configuration
+- Cleaning configuration
+- Rate and dividend assumptions
+- Accepted and rejected quote counts
+- Diagnostic summary
+- Deterministic dataset identifiers
+
+### Target Dataset Layout
+
+```text
+dataset/
+    raw/
+        source.csv
+    processed/
+        option_chain.csv
+    rejected/
+        rejected_quotes.csv
+    diagnostics/
+        validation.json
+        cleaning.json
+        arbitrage.json
+    manifest.json
+```
+
+Example `manifest.json`:
+
+```json
+{
+  "schema_version": "1.0",
+  "source": "test_fixture",
+  "as_of": "2026-07-30T08:00:00Z",
+  "day_count": "ACT/365F",
+  "cleaning_config": {},
+  "input_hash": "...",
+  "output_hash": "..."
+}
+```
+
+### Stage 2 Development Order
+
+```text
+2.1 Canonical models
+        ↓
+2.2 Validation framework
+        ↓
+2.3 CSV ingestion
+        ↓
+2.4 Normalisation
+        ↓
+2.5 Rates, dividends, and forwards
+        ↓
+2.6 Derived fields and year fractions
+        ↓
+2.7 Cleaning policies
+        ↓
+2.8 Static-arbitrage diagnostics
+        ↓
+2.9 pandas interoperability
+        ↓
+2.10 Serialisation and dataset snapshots
+```
 
 ### Status
 
@@ -1024,7 +1587,7 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Begin market-data models and option-chain processing
+1. Begin Stage 2.1 — Canonical Market Data Models
 2. Build chain-wide implied-volatility workflows
 3. Start volatility smile and surface research
 

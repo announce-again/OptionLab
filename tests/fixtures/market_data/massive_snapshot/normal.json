@@ -1,0 +1,80 @@
+{
+  "request_id": "synthetic-stage-2-0b-normal",
+  "status": "OK",
+  "next_url": "https://api.massive.com/v3/snapshot/options/AAPL?cursor=synthetic_next_page",
+  "results": [
+    {
+      "break_even_price": 185.05,
+      "details": {
+        "contract_type": "call",
+        "exercise_style": "american",
+        "expiration_date": "2026-08-21",
+        "shares_per_contract": 100,
+        "strike_price": 180,
+        "ticker": "O:AAPL260821C00180000"
+      },
+      "implied_volatility": 0.245,
+      "last_quote": {
+        "ask": 5.05,
+        "ask_size": 15,
+        "bid": 4.9,
+        "bid_size": 12,
+        "last_updated": 1785421800000000000,
+        "midpoint": 4.975,
+        "timeframe": "DELAYED"
+      },
+      "last_trade": {
+        "exchange": 316,
+        "price": 4.95,
+        "sip_timestamp": 1785421790000000000,
+        "size": 2,
+        "timeframe": "DELAYED"
+      },
+      "open_interest": 1200,
+      "underlying_asset": {
+        "last_updated": 1785421800000000000,
+        "price": 181.22,
+        "ticker": "AAPL",
+        "timeframe": "DELAYED"
+      },
+      "fixture_record_type": "synthetic_normal"
+    },
+    {
+      "break_even_price": 176.15,
+      "details": {
+        "contract_type": "put",
+        "exercise_style": "american",
+        "expiration_date": "2026-08-21",
+        "shares_per_contract": 100,
+        "strike_price": 180,
+        "ticker": "O:AAPL260821P00180000"
+      },
+      "implied_volatility": 0.238,
+      "last_quote": {
+        "ask": 3.85,
+        "ask_size": 11,
+        "bid": 3.7,
+        "bid_size": 10,
+        "last_updated": 1785421800000000000,
+        "midpoint": 3.775,
+        "timeframe": "DELAYED"
+      },
+      "last_trade": {
+        "exchange": 316,
+        "price": 3.75,
+        "sip_timestamp": 1785421760000000000,
+        "size": 1,
+        "timeframe": "DELAYED"
+      },
+      "open_interest": 980,
+      "underlying_asset": {
+        "last_updated": 1785421800000000000,
+        "price": 181.22,
+        "ticker": "AAPL",
+        "timeframe": "DELAYED"
+      },
+      "fixture_record_type": "synthetic_normal"
+    }
+  ]
+}
+

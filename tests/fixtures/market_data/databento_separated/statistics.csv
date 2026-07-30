@@ -1,0 +1,4 @@
+ts_recv,ts_event,instrument_id,stat_type,value,as_of_date,fixture_record_type
+1785420000000000000,1785420000000000000,1001,open_interest,1200,2026-07-29,synthetic_statistics
+1785420000000000000,1785420000000000000,1002,open_interest,980,2026-07-29,synthetic_statistics
+1785420000000000000,1785420000000000000,1003,open_interest,1500,2026-07-29,synthetic_statistics

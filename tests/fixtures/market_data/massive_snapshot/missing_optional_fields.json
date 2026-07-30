@@ -1,0 +1,63 @@
+{
+  "request_id": "synthetic-stage-2-0b-missing-optional",
+  "status": "OK",
+  "next_url": null,
+  "results": [
+    {
+      "details": {
+        "contract_type": "call",
+        "exercise_style": "american",
+        "expiration_date": "2026-09-18",
+        "shares_per_contract": 100,
+        "strike_price": 185,
+        "ticker": "O:AAPL260918C00185000"
+      },
+      "implied_volatility": 5,
+      "last_quote": {
+        "ask": 5.4,
+        "ask_size": 9,
+        "bid": 5.25,
+        "bid_size": 8,
+        "last_updated": 1785421800000000000,
+        "midpoint": 5.325,
+        "timeframe": "DELAYED"
+      },
+      "open_interest": 1500,
+      "underlying_asset": {
+        "last_updated": 1785421800000000000,
+        "price": 181.22,
+        "ticker": "AAPL",
+        "timeframe": "DELAYED"
+      },
+      "fixture_record_type": "synthetic_missing_optional",
+      "fixture_note": "Missing last_trade and greeks; implied_volatility intentionally exceeds 1 and must not be rescaled without provider unit evidence."
+    },
+    {
+      "details": {
+        "contract_type": "put",
+        "exercise_style": "american",
+        "expiration_date": "2026-09-18",
+        "shares_per_contract": 100,
+        "strike_price": 185,
+        "ticker": "O:AAPL260918P00185000"
+      },
+      "last_trade": {
+        "exchange": 316,
+        "price": 6.1,
+        "sip_timestamp": 1785421700000000000,
+        "size": 3,
+        "timeframe": "DELAYED"
+      },
+      "open_interest": null,
+      "underlying_asset": {
+        "last_updated": 1785421800000000000,
+        "price": 181.22,
+        "ticker": "AAPL",
+        "timeframe": "DELAYED"
+      },
+      "fixture_record_type": "synthetic_missing_optional",
+      "fixture_note": "Missing last_quote, greeks, and implied_volatility; open_interest reference date is unknown."
+    }
+  ]
+}
+

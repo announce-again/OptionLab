@@ -1,0 +1,7 @@
+Underlying Symbol,Quote Datetime,Root,Expiration,Strike,Option Type,Open,High,Low,Close,Trade Volume,Bid Size,Bid,Ask Size,Ask,Underlying Bid,Underlying Ask,Active Underlying Price,Implied Volatility,Open Interest,fixture_record_type,synthetic_issue
+AAPL,2026-07-30T14:30:00Z,AAPL,2026-08-21,175.00,C,7.90,8.20,7.80,8.05,0,0,,10,8.15,181.20,181.24,181.22,0.240,1100,synthetic_quality_case,missing_bid
+AAPL,2026-07-30T14:30:00Z,AAPL,2026-08-21,175.00,P,2.45,2.60,2.40,2.50,0,9,2.45,0,,181.20,181.24,181.22,0.235,900,synthetic_quality_case,missing_ask
+AAPL,2026-07-30T14:30:00Z,AAPL,2026-08-21,185.00,C,2.10,2.30,2.00,2.20,3,5,2.30,5,2.10,181.20,181.24,181.22,0.255,800,synthetic_quality_case,crossed_quote
+AAPL,2026-07-30T14:30:00Z,AAPL,2026-08-21,185.00,P,6.10,6.20,5.95,6.05,1,4,6.05,4,6.05,181.20,181.24,181.22,0.250,,synthetic_quality_case,locked_quote_missing_oi
+AAPL,2026-07-30T14:31:00Z,AAPL,2026-08-21,190.00,C,1.25,1.35,1.20,1.30,0,0,0.00,0,0.00,181.46,181.50,181.48,0.265,700,synthetic_quality_case,zero_bid_ask_zero_volume
+
