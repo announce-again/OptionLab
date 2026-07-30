@@ -36,8 +36,8 @@ parsers, validators, pandas interfaces, or cleaning policies.
 
 - Bid and ask may be independently absent.
 - Zero bid or ask prices must remain structurally representable.
-- Negative quote values should be representable long enough to produce
-  structured validation issues.
+- Negative quote values should be preserved in raw ingestion records, but
+  rejected at the canonical model boundary.
 - Crossed and locked markets must be representable before cleaning.
 - Quote timestamps must support timezone-aware UTC datetimes.
 - Bid and ask sizes are optional.
@@ -53,6 +53,7 @@ parsers, validators, pandas interfaces, or cleaning policies.
   canonical slice.
 - If `OptionTrade` is included, trade price, size, timestamp, and trade venue
   should be modelled together.
+- Trade prices must be non-negative finite values.
 - Cboe interval `Close` must not be loaded into `OptionTrade.price`.
 - Trade timestamps must remain separate from quote timestamps.
 
@@ -71,6 +72,8 @@ parsers, validators, pandas interfaces, or cleaning policies.
 ## Underlying Requirements
 
 - Underlying spot is optional at contract/quote ingestion time.
+- Underlying price, bid, and ask must be non-negative finite values when
+  present.
 - Underlying spot or forward is required only for selected enrichment
   operations such as moneyness, intrinsic value, and arbitrage bounds.
 - Underlying bid and ask may be available without a provider midpoint.
@@ -144,4 +147,3 @@ Stage 2.1 should postpone:
 - Provider-specific normalization rules beyond type definitions needed by the
   canonical model.
 - Interval-bar modelling unless it is required to keep quote semantics clean.
-

@@ -695,15 +695,181 @@ defines what the data is; it does not handle CSV parsing, cleaning, or pandas.
 - `ExerciseStyle`
 - `OptionContract`
 - `OptionQuote`
+- `OptionTrade`
 - Underlying quote representation
 - Option-chain snapshot representation
 - Timestamp, exchange, and data-source metadata
 - Contract identity, deterministic sorting, and hashing
 - Canonical keys needed for call-put pairing
+- Public exports and focused model tests
 
 ### Status
 
-**Planned**
+**Complete**
+
+---
+
+## Stage 2.1a — Enums and Shared Primitives
+
+### Scope
+
+Define the shared primitive language used by canonical market-data models.
+
+### Capabilities
+
+- `OptionType`
+- `ExerciseStyle`
+- `SourceMetadata`
+- `ContractPairingKey`
+- Timezone-aware timestamp validation
+- Required and optional text validation
+- Finite numeric validation
+- Non-negative integer validation for sizes and counts
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.1b — OptionContract
+
+### Scope
+
+Represent option contract identity without relying solely on provider symbol
+parsing.
+
+### Capabilities
+
+- Explicit underlying, expiration, strike, and option type
+- Optional exercise style
+- Optional contract multiplier
+- Optional currency
+- Optional source contract identifier
+- Optional display symbol
+- Optional listing exchange
+- Contract hashing
+- Deterministic contract sorting
+- Stable call-put pairing key
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.1c — OptionQuote and OptionTrade
+
+### Scope
+
+Represent quote and trade observations while keeping quote time, trade time,
+quote venues, and trade venue separate.
+
+### Capabilities
+
+- Independently missing bid and ask
+- Structurally representable zero bid and ask
+- Optional bid and ask sizes
+- Optional bid and ask venues
+- Optional session volume with explicit session semantics
+- Optional open interest with separate reference date
+- `OptionTrade` with trade price, trade size, trade timestamp, and trade venue
+- No cleaning, midpoint calculation, provider-IV authority, or bar aggregation
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.1d — UnderlyingQuote
+
+### Scope
+
+Represent underlying-market observations without requiring synchronized spot
+data for every option quote.
+
+### Capabilities
+
+- Underlying symbol
+- Timezone-aware quote timestamp
+- Optional spot price
+- Optional bid and ask
+- Optional bid and ask venues
+- Optional source metadata
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.1e — OptionChainSnapshot
+
+### Scope
+
+Represent a logical option-chain snapshot independently of any source file,
+API page, or provider-specific ingestion format.
+
+### Capabilities
+
+- Snapshot underlying symbol
+- Timezone-aware snapshot timestamp
+- Optional underlying quote
+- Tuple-based immutable quote and trade collections
+- Deterministic quote and trade ordering
+- Contract collection derived from quote and trade observations
+- Detection of obvious underlying-symbol inconsistency
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.1f — Identity, Ordering, Hashing, and Pairing Keys
+
+### Scope
+
+Make contract identity stable enough for deterministic processing and call-put
+pairing.
+
+### Capabilities
+
+- Frozen model objects
+- Hashable contracts
+- Source identifier separated from display symbol
+- Deterministic `sort_key` values
+- Stable `ContractPairingKey` independent of call or put side
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.1g — Public Exports and Model Tests
+
+### Scope
+
+Expose canonical models through the public market-data package and verify the
+Stage 2.1 model boundary.
+
+### Capabilities
+
+- `ncx_derivatives.market_data` public exports
+- Immutability tests
+- Hashing tests
+- Timezone-aware timestamp tests
+- Missing bid/ask tests
+- Zero-price representation tests
+- Open-interest reference-date tests
+- Snapshot consistency tests
+- Full Stage 1 and fixture test compatibility
+
+### Status
+
+**Complete**
 
 ---
 
@@ -1587,9 +1753,9 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Begin Stage 2.1 — Canonical Market Data Models
-2. Build chain-wide implied-volatility workflows
-3. Start volatility smile and surface research
+1. Begin Stage 2.2 — Validation Framework
+2. Build CSV ingestion and normalisation on top of canonical models
+3. Build chain-wide implied-volatility workflows
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.
 
