@@ -1032,7 +1032,109 @@ parsed canonical objects
 
 ### Status
 
-**Planned**
+**Complete**
+
+---
+
+## Stage 2.3a — CSV Schema and Column Mapping
+
+### Scope
+
+Define an explicit CSV boundary schema without hard-coding provider-specific
+adapters.
+
+### Capabilities
+
+- `CsvColumnMapping`
+- Required option quote columns
+- Optional contract columns
+- Optional quote-size and volume columns
+- Optional open-interest columns
+- Optional underlying quote columns
+- Explicit value maps for source-specific enum representations
+- Header validation for every configured mapped column
+- Exact value mapping only; case folding and provider normalization remain in Stage 2.4
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.3b — Raw Records and Row-Level Errors
+
+### Scope
+
+Preserve raw CSV rows and report row-level ingestion failures without stopping
+the whole file.
+
+### Capabilities
+
+- `CsvRawRecord`
+- `CsvIngestionError`
+- Row number preservation
+- Column-level parse error reporting
+- Missing required column reporting
+- Missing mapped column reporting
+- Continue parsing valid rows after row-level failures
+- Rows with row-level ingestion errors are excluded from canonical output
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.3c — Typed Parsing
+
+### Scope
+
+Parse CSV text into canonical model primitives.
+
+### Capabilities
+
+- Numeric parsing
+- Integer parsing
+- ISO date parsing
+- ISO datetime parsing
+- Timezone assumption for naive datetimes
+- General `tzinfo` support for assumed timezone
+- Explicit behavior when no snapshot timestamp column is mapped: quote timestamp
+  is used as the grouping timestamp
+- Missing-value interpretation
+- Option type parsing
+- Exercise style parsing
+
+### Status
+
+**Complete**
+
+---
+
+## Stage 2.3d — Snapshot Construction
+
+### Scope
+
+Construct canonical option-chain snapshots rather than DataFrames.
+
+### Capabilities
+
+- `ingest_option_chain_csv`
+- `ingest_option_chain_csv_file`
+- `CsvIngestionResult`
+- Built-in CSV ingestion error codes
+- Immutable config mappings and raw records
+- Successful and failed row counts
+- Schema error access
+- Group rows into logical snapshots by underlying and snapshot timestamp
+- Build `OptionContract`
+- Build `OptionQuote`
+- Build optional `UnderlyingQuote`
+- Deterministic snapshot output ordering
+
+### Status
+
+**Complete**
 
 ---
 
@@ -1855,8 +1957,8 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Begin Stage 2.3 — CSV Ingestion
-2. Build normalisation on top of canonical models
+1. Begin Stage 2.4 — Normalisation
+2. Build rates, dividends, and forwards
 3. Build chain-wide implied-volatility workflows
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.
