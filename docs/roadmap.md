@@ -73,17 +73,17 @@ Build a reliable analytical and numerical foundation for derivatives pricing.
 
 ---
 
-## Stage 1.1 — Black–Scholes–Merton Pricing
+## Stage 1.1 — Black–Scholes Pricing
 
 ### Scope
 
-Implement European call and put pricing under the Black–Scholes–Merton model.
+Implement European call and put pricing under the no-dividend
+Black–Scholes model.
 
 ### Capabilities
 
 - European call pricing
 - European put pricing
-- Continuous dividend yield
 - Negative interest-rate support
 - Expiry payoff handling
 - Zero-volatility deterministic limits
@@ -93,7 +93,7 @@ Implement European call and put pricing under the Black–Scholes–Merton model
 ### Validation
 
 - Published benchmark prices
-- Put-call parity
+- No-dividend put-call parity
 - Price monotonicity
 - Volatility monotonicity
 - Static-arbitrage bounds
@@ -118,7 +118,7 @@ Implement first- and second-order sensitivities for European options.
 - Vega
 - Call and put Theta
 - Call and put Rho
-- Continuous-dividend Black–Scholes–Merton formulas
+- Black–Scholes analytical formulas
 - Explicit unit conventions
 
 ### Validation
@@ -141,7 +141,7 @@ Implement first- and second-order sensitivities for European options.
 
 ### Scope
 
-Invert Black–Scholes–Merton prices to recover implied volatility.
+Invert Black–Scholes prices to recover implied volatility.
 
 ### Capabilities
 
@@ -163,7 +163,6 @@ Invert Black–Scholes–Merton prices to recover implied volatility.
 - Deep out-of-the-money options
 - Near-expiry options
 - Negative interest rates
-- Continuous dividend yields
 - Boundary prices
 - Invalid market prices
 
@@ -208,7 +207,7 @@ Extend the analytical pricing, Greeks, and implied-volatility stack from Black�
 
 Introduce the first general-purpose numerical pricing method using the Cox–Ross–Rubinstein tree.
 
-### Planned Capabilities
+### Capabilities
 
 - European call and put pricing
 - American call and put pricing
@@ -237,7 +236,7 @@ Introduce the first general-purpose numerical pricing method using the Cox–Ros
 
 ### Status
 
-**Planned**
+**Complete**
 
 ---
 
@@ -889,12 +888,11 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Implement Cox–Ross–Rubinstein European pricing
-2. Validate convergence against Black–Scholes–Merton
-3. Add American early-exercise logic
-4. Implement Monte Carlo pricing with uncertainty estimates
-5. Introduce numerical Greek estimators
-6. Begin market-data models and option-chain processing
+1. Implement Monte Carlo pricing with uncertainty estimates
+2. Introduce numerical Greek estimators
+3. Begin market-data models and option-chain processing
+4. Build chain-wide implied-volatility workflows
+5. Start volatility smile and surface research
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.
 

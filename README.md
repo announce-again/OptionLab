@@ -9,6 +9,9 @@ market-making platform.
 - Continuous dividend yield support
 - Analytical Delta, Gamma, Vega, Theta, and Rho
 - Implied volatility inversion with a hybrid Newton-bisection solver
+- Cox-Ross-Rubinstein binomial tree pricing
+- European and American option support
+- Optional American exercise-boundary extraction
 - No-arbitrage bounds and input validation
 - Finite-difference validation of analytical Greeks
 - Comprehensive automated test coverage with pytest
@@ -23,7 +26,7 @@ pip install -e .
 
 ```python
 from ncx_derivatives.greeks import call_delta, gamma, vega
-from ncx_derivatives.pricing import call_price
+from ncx_derivatives.pricing import binomial_put_price, call_price
 from ncx_derivatives.volatility import call_implied_volatility
 
 price = call_price(
@@ -70,18 +73,31 @@ implied_volatility = call_implied_volatility(
     rate=0.05,
     dividend_yield=0.02,
 )
+
+american_put = binomial_put_price(
+    spot=100.0,
+    strike=100.0,
+    maturity=1.0,
+    rate=0.05,
+    volatility=0.20,
+    dividend_yield=0.02,
+    steps=500,
+    american=True,
+)
 ```
 
 ## Roadmap
 
-- [x] Black-Scholes-Merton pricing
-- [x] Analytical Greeks
-- [x] Implied volatility solver
-- [ ] Binomial tree pricing
-- [ ] Monte Carlo pricing
-- [ ] Volatility surfaces
-- [ ] Portfolio risk
-- [ ] Market-making simulation
+- [x] Stage 1.1: Black-Scholes pricing
+- [x] Stage 1.2: Analytical Greeks
+- [x] Stage 1.3: Implied volatility solver
+- [x] Stage 1.4: Continuous dividend yield
+- [x] Stage 1.5: Binomial tree pricing
+- [ ] Stage 1.6: Monte Carlo pricing
+- [ ] Stage 1.7: Numerical Greeks
+- [ ] Stage 3: Volatility surfaces
+- [ ] Stage 5: Portfolio risk
+- [ ] Stage 6: Market-making simulation
 
 ## Testing
 
