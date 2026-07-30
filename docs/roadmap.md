@@ -1662,9 +1662,52 @@ tool, not the internal market-data model.
 - Cleaning report to DataFrame
 - APIs such as `option_chain_to_dataframe(snapshot)` and `option_chain_from_dataframe(frame)`
 
+### Implemented Capabilities
+
+- `option_chain_to_records`
+- `option_chain_from_records`
+- `option_chain_to_dataframe`
+- `option_chain_from_dataframe`
+- `enriched_quotes_to_records`
+- `enriched_quotes_to_dataframe`
+- `validation_report_to_records`
+- `validation_report_to_dataframe`
+- `cleaning_result_to_records`
+- `cleaning_result_to_dataframe`
+- `static_arbitrage_report_to_records`
+- `static_arbitrage_report_to_dataframe`
+- Snapshot round-trip through records and DataFrame
+- Enriched quote export to records and DataFrame
+- Validation, cleaning, and static-arbitrage diagnostics export
+- Stable DataFrame columns for empty exports
+- Snapshot and underlying quote consistency checks when rebuilding snapshots
+- Pure-Python records conversion without requiring pandas
+
+### Boundary Notes
+
+pandas remains a boundary-layer dependency. The core market-data models,
+validation, enrichment, cleaning, and static-arbitrage diagnostics do not import
+pandas. DataFrame functions import pandas only when called and raise a clear
+runtime error if pandas is unavailable. DataFrame input normalises pandas-native
+missing values such as `pd.NA`, `NaT`, and `NaN` to `None` before entering the
+pure-Python records parser.
+
+The records representation is the stable intermediate format for dataset
+exports and future serialisation work. DataFrame conversion is a convenience
+wrapper around records conversion, not an internal storage model.
+
+`option_chain_from_records` rebuilds one non-empty snapshot at a time. Empty
+snapshot round-trip is intentionally deferred until serialisation introduces an
+explicit snapshot header or manifest. Snapshot-level metadata and underlying
+quote fields must be consistent across all rows.
+
+Enriched quote exports include the original canonical quote and contract
+columns plus derived research columns, so resulting research tables can still
+audit bid, ask, liquidity, contract identity, and source metadata.
+
 ### Status
 
-**Planned**
+**Complete**
 
 ---
 
@@ -2254,9 +2297,9 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Begin Stage 2.9 — pandas Interoperability
-2. Build serialisation and dataset snapshots
-3. Build chain-wide implied-volatility workflows
+1. Begin Stage 2.10 — Serialisation and Dataset Snapshots
+2. Build chain-wide implied-volatility workflows
+3. Build volatility-surface diagnostics and research workflows
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.
 
