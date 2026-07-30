@@ -8,6 +8,14 @@ from .black_scholes import (
     put_theta,
     vega,
 )
+from .numerical import (
+    NumericalGreekResult,
+    numerical_delta,
+    numerical_gamma,
+    numerical_rho,
+    numerical_theta,
+    numerical_vega,
+)
 
 __all__ = [
     "call_delta",
@@ -18,4 +26,10 @@ __all__ = [
     "put_theta",
     "call_rho",
     "put_rho",
+    "NumericalGreekResult",
+    "numerical_delta",
+    "numerical_gamma",
+    "numerical_vega",
+    "numerical_theta",
+    "numerical_rho",
 ]

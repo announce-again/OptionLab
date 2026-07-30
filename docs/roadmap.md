@@ -415,7 +415,7 @@ closed-form coverage.
 
 Provide model-independent Greek estimation for numerical pricers.
 
-### Planned Capabilities
+### Capabilities
 
 - Bump-and-revalue Delta
 - Gamma
@@ -436,7 +436,7 @@ Provide model-independent Greek estimation for numerical pricers.
 
 ### Status
 
-**Planned**
+**Complete**
 
 ---
 
@@ -1024,10 +1024,9 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Introduce numerical Greek estimators
-2. Begin market-data models and option-chain processing
-3. Build chain-wide implied-volatility workflows
-4. Start volatility smile and surface research
+1. Begin market-data models and option-chain processing
+2. Build chain-wide implied-volatility workflows
+3. Start volatility smile and surface research
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.
 

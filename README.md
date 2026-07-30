@@ -29,6 +29,7 @@ pip install -e .
 
 ```python
 from ncx_derivatives.greeks import call_delta, gamma, vega
+from ncx_derivatives.greeks import numerical_delta
 from ncx_derivatives.monte_carlo import (
     monte_carlo_asian_call_price,
     monte_carlo_call_price,
@@ -117,6 +118,19 @@ asian_result = monte_carlo_asian_call_price(
     antithetic=True,
     control_variate=True,
 )
+
+mc_delta = numerical_delta(
+    monte_carlo_call_price,
+    spot=100.0,
+    strike=100.0,
+    maturity=1.0,
+    rate=0.05,
+    volatility=0.20,
+    dividend_yield=0.02,
+    bump=0.10,
+    simulations=50_000,
+    seed=42,
+)
 ```
 
 ## Roadmap
@@ -131,7 +145,7 @@ asian_result = monte_carlo_asian_call_price(
 - [x] Stage 1.6c: Monte Carlo standard errors and confidence intervals
 - [x] Stage 1.6d: Monte Carlo variance reduction
 - [x] Stage 1.7: Asian option Monte Carlo pricing
-- [ ] Stage 1.8: Numerical Greeks
+- [x] Stage 1.8: Numerical Greeks
 - [ ] Stage 3: Volatility surfaces
 - [ ] Stage 5: Portfolio risk
 - [ ] Stage 6: Market-making simulation
