@@ -33,12 +33,22 @@ and market-making research platform.
 - pandas interoperability
 - Deterministic dataset serialisation with manifests and hashes
 
+### Implied-volatility research data
+
+- Chain-wide bid, midpoint, and ask implied volatility
+- Per-side solver failures and diagnostic flags
+- Vega, spot moneyness, forward moneyness, and log-forward-moneyness
+- Deterministic records, DataFrame, and CSV exports
+- Executable 50,000-row ingestion-to-IV pipeline
+
 ### Engineering
 
 - Comprehensive automated test coverage with pytest
 
 See [Stage 2 summary](docs/stage_2_summary.md) for the full market-data
-infrastructure overview.
+infrastructure overview and the
+[Stage 3.1 volatility pipeline](docs/volatility_pipeline.md) for the large
+end-to-end workflow and benchmark.
 
 ## Installation
 
@@ -176,4 +186,5 @@ mc_delta = numerical_delta(
 
 ```bash
 pytest
+pytest -m large tests/test_volatility_pipeline_large.py -vv
 ```

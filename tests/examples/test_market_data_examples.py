@@ -1,6 +1,7 @@
 from pathlib import Path
 import runpy
 import shutil
+import sys
 
 import pytest
 
@@ -40,3 +41,24 @@ def test_market_data_example_runs(filename: str, monkeypatch, tmp_path) -> None:
         runpy.run_path(str(path), run_name="__main__")
     finally:
         shutil.rmtree(output_dir, ignore_errors=True)
+
+
+def test_stage_3_1_pipeline_example_runs(monkeypatch, tmp_path) -> None:
+    repo_root = Path(__file__).parents[2]
+    output_dir = tmp_path / "volatility_pipeline"
+    path = (
+        repo_root
+        / "examples"
+        / "market_data"
+        / "10_stage_3_1_volatility_pipeline.py"
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [str(path), "--rows", "500", "--output-dir", str(output_dir)],
+    )
+
+    runpy.run_path(str(path), run_name="__main__")
+
+    assert (output_dir / "synthetic_option_quotes.csv").is_file()
+    assert (output_dir / "implied_volatility_chain.csv").is_file()

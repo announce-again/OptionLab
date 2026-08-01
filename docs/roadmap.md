@@ -1930,6 +1930,11 @@ not expose `UNSTABLE_IV` until a distinct stability definition exists.
   not as a continuous-limit claim for every degenerate parameter combination
 - The public volatility-chain export uses `log_forward_moneyness =
   log(strike / forward_price)` to fix the skew-coordinate sign convention
+- End-to-end CSV pipeline reuses Stage 2 ingestion, enrichment, and cleaning APIs
+  before calling `build_implied_volatility_chain`
+- Deterministic 50,000-row synthetic smoke/performance coverage is kept behind the
+  separate `large` pytest marker
+- Deterministic IV-chain CSV export preserves all Stage 3.1 semantic fields
 
 ### Status
 
