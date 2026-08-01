@@ -1,9 +1,43 @@
 from .black_scholes import (
+    ImpliedVolatilityBoundsError,
+    ImpliedVolatilityConvergenceError,
+    ImpliedVolatilityError,
+    ImpliedVolatilityInputError,
     call_implied_volatility,
     put_implied_volatility,
 )
+from .chains import (
+    IMPLIED_VOLATILITY_CHAIN_COLUMNS,
+    ImpliedVolatilityChain,
+    ImpliedVolatilityChainSummary,
+    ImpliedVolatilityDiagnosticFlag,
+    ImpliedVolatilityFailureReason,
+    ImpliedVolatilityQuote,
+    ImpliedVolatilityResult,
+    ImpliedVolatilityStatus,
+    build_implied_volatility_chain,
+    implied_volatility_chain_summary,
+    implied_volatility_chain_to_dataframe,
+    implied_volatility_chain_to_records,
+)
 
 __all__ = [
+    "IMPLIED_VOLATILITY_CHAIN_COLUMNS",
+    "ImpliedVolatilityBoundsError",
+    "ImpliedVolatilityChain",
+    "ImpliedVolatilityChainSummary",
+    "ImpliedVolatilityConvergenceError",
+    "ImpliedVolatilityDiagnosticFlag",
+    "ImpliedVolatilityError",
+    "ImpliedVolatilityFailureReason",
+    "ImpliedVolatilityInputError",
+    "ImpliedVolatilityQuote",
+    "ImpliedVolatilityResult",
+    "ImpliedVolatilityStatus",
+    "build_implied_volatility_chain",
     "call_implied_volatility",
+    "implied_volatility_chain_summary",
+    "implied_volatility_chain_to_dataframe",
+    "implied_volatility_chain_to_records",
     "put_implied_volatility",
 ]

@@ -1,11 +1,30 @@
 from collections.abc import Callable
-from math import exp, inf, pi, sqrt
+from math import exp, inf, isclose, pi, sqrt
 
 from ncx_derivatives.greeks import vega
 from ncx_derivatives.pricing import call_price, put_price
 
 
 PriceFunction = Callable[[float, float, float, float, float, float], float]
+
+IMPLIED_VOLATILITY_PRICE_ABSOLUTE_TOLERANCE = 1e-10
+IMPLIED_VOLATILITY_PRICE_RELATIVE_TOLERANCE = 1e-12
+
+
+class ImpliedVolatilityError(ValueError):
+    """Base error for implied-volatility inversion failures."""
+
+
+class ImpliedVolatilityInputError(ImpliedVolatilityError):
+    """Raised when solver inputs are outside the supported domain."""
+
+
+class ImpliedVolatilityBoundsError(ImpliedVolatilityError):
+    """Raised when a price violates no-arbitrage bounds."""
+
+
+class ImpliedVolatilityConvergenceError(ImpliedVolatilityError):
+    """Raised when the solver cannot bracket or converge to an IV."""
 
 
 def _validate_inputs(
@@ -15,13 +34,13 @@ def _validate_inputs(
     maturity: float,
 ) -> None:
     if option_price < 0.0:
-        raise ValueError("option price must be non-negative")
+        raise ImpliedVolatilityInputError("option price must be non-negative")
     if spot <= 0.0:
-        raise ValueError("spot must be positive")
+        raise ImpliedVolatilityInputError("spot must be positive")
     if strike <= 0.0:
-        raise ValueError("strike must be positive")
+        raise ImpliedVolatilityInputError("strike must be positive")
     if maturity < 0.0:
-        raise ValueError("maturity must be non-negative")
+        raise ImpliedVolatilityInputError("maturity must be non-negative")
 
 
 def _no_arbitrage_bounds(
@@ -55,10 +74,37 @@ def _validate_price_bounds(
     upper_bound: float,
     tolerance: float,
 ) -> None:
-    if option_price < lower_bound - tolerance:
-        raise ValueError("option price is below no-arbitrage lower bound")
-    if option_price > upper_bound + tolerance:
-        raise ValueError("option price is above no-arbitrage upper bound")
+    if option_price < lower_bound and not _is_close_to_price_bound(
+        option_price,
+        lower_bound,
+        absolute_tolerance=tolerance,
+    ):
+        raise ImpliedVolatilityBoundsError(
+            "option price is below no-arbitrage lower bound",
+        )
+    if option_price > upper_bound and not _is_close_to_price_bound(
+        option_price,
+        upper_bound,
+        absolute_tolerance=tolerance,
+    ):
+        raise ImpliedVolatilityBoundsError(
+            "option price is above no-arbitrage upper bound",
+        )
+
+
+def _is_close_to_price_bound(
+    price: float,
+    bound: float,
+    *,
+    absolute_tolerance: float = IMPLIED_VOLATILITY_PRICE_ABSOLUTE_TOLERANCE,
+    relative_tolerance: float = IMPLIED_VOLATILITY_PRICE_RELATIVE_TOLERANCE,
+) -> bool:
+    return isclose(
+        price,
+        bound,
+        rel_tol=relative_tolerance,
+        abs_tol=absolute_tolerance,
+    )
 
 
 def _initial_volatility_guess(
@@ -85,7 +131,7 @@ def _implied_volatility(
     price_function: PriceFunction,
     option_type: str,
     *,
-    price_tolerance: float = 1e-10,
+    price_tolerance: float = IMPLIED_VOLATILITY_PRICE_ABSOLUTE_TOLERANCE,
     volatility_tolerance: float = 1e-10,
     max_iterations: int = 100,
     max_volatility: float = 10.0,
@@ -108,11 +154,19 @@ def _implied_volatility(
         price_tolerance,
     )
 
-    if option_price <= lower_bound + price_tolerance:
+    if option_price <= lower_bound or _is_close_to_price_bound(
+        option_price,
+        lower_bound,
+        absolute_tolerance=price_tolerance,
+    ):
         return 0.0
     if maturity == 0.0:
         return 0.0
-    if option_price >= upper_bound - price_tolerance:
+    if option_price >= upper_bound or _is_close_to_price_bound(
+        option_price,
+        upper_bound,
+        absolute_tolerance=price_tolerance,
+    ):
         return inf
 
     low = 0.0
@@ -146,7 +200,9 @@ def _implied_volatility(
         )
         < option_price
     ):
-        raise ValueError("implied volatility exceeds solver upper bound")
+        raise ImpliedVolatilityConvergenceError(
+            "implied volatility exceeds solver upper bound",
+        )
 
     sigma = _initial_volatility_guess(
         option_price,

@@ -1847,40 +1847,118 @@ Example `manifest.json`:
 
 ## Objective
 
-Transform cleaned option prices into consistent implied-volatility structures and research tools.
+Transform cleaned option prices into implied-volatility observations, research-ready
+smiles, non-parametric surfaces, model-independent diagnostics, and calibrated
+parametric volatility models.
+
+The development dependency is:
+
+```text
+cleaned market prices
+-> all implied-volatility observations
+-> selected and structured smiles
+-> interpolated surface
+-> model-independent diagnostics
+-> SVI / SSVI calibration
+-> historical volatility research
+```
 
 ---
 
 ## Stage 3.1 — Implied Volatility Chains
 
+### Scope
+
+Convert cleaned option prices into structured implied-volatility data. This stage
+generates all usable IV observations; it does not decide which observations enter
+smile research.
+
 ### Planned Capabilities
 
-- Chain-wide implied-volatility calculation
-- Bid, ask, and midpoint implied volatility
-- Solver diagnostics
-- Failed-inversion reporting
-- Vega-aware filtering
-- Moneyness transformations
-- Forward log-moneyness
+- Chain-wide bid, midpoint, and ask implied volatility
+- Solver status and machine-readable failure reasons
+- No-arbitrage failure reporting
+- Explicit handling for lower-bound `0.0` and upper-bound `inf`
+- Vega calculation
+- Spot moneyness and forward moneyness
+- Log-forward-moneyness
+- Deterministic ordering
+- Chain-level summary
+- Records and pandas export
+
+### Failure Reasons
+
+- `MISSING_PRICE`
+- `OUTSIDE_BOUNDS`
+- `INVALID_INPUT`
+- `SOLVER_FAILED`
+- `NON_FINITE_RESULT`
+
+### Diagnostic Flags
+
+- `LOW_VEGA`
+- `VEGA_UNAVAILABLE`
+- `UPPER_BOUND_IV`
+
+Failure reasons explain why a result has no IV. Diagnostic flags describe quality,
+stability, or special boundary behaviour for returned observations. Stage 3.1 v1
+uses `UPPER_BOUND_IV` for the legal `inf` upper-bound result and treats unexpected
+`nan` or non-boundary `inf` as `FAILED / NON_FINITE_RESULT`. A finite successful IV
+with unavailable Vega remains usable but carries `VEGA_UNAVAILABLE`; Stage 3.1 does
+not expose `UNSTABLE_IV` until a distinct stability definition exists.
+
+### Completion Standard
+
+- Synthetic chains recover the input volatility
+- Bid IV <= mid IV <= ask IV
+- A single failed inversion does not fail the whole chain
+- Status and failure reason are machine-readable
+- Vega and moneyness fields are complete
+- Output ordering is deterministic
+- Records and DataFrame exports preserve semantic fields
+- `0.0`, `inf`, missing prices, and invalid prices have explicit behaviour
+
+### Implementation Notes
+
+- Initial API added via `build_implied_volatility_chain`
+- Chain records and pandas export added
+- Bid, midpoint, and ask IV results carry status, failure reason, Vega, and
+  diagnostic flags
+- The solver and chain share one scale-aware absolute/relative price-bound
+  tolerance policy
+- `IV = 0.0` maps to `Vega = 0.0` as an explicit boundary representation policy,
+  not as a continuous-limit claim for every degenerate parameter combination
+- The public volatility-chain export uses `log_forward_moneyness =
+  log(strike / forward_price)` to fix the skew-coordinate sign convention
 
 ### Status
 
-**Planned**
+**Complete**
 
 ---
 
-## Stage 3.2 — Smile and Skew Analysis
+## Stage 3.2 — Smile Representation and Skew Analysis
+
+### Scope
+
+Construct research-ready smiles from IV observations and extract smile metrics.
+This stage owns quote-selection policy for smile research.
 
 ### Planned Capabilities
 
-- Volatility smile visualisation
-- Strike skew
-- Delta-based skew
+- Expiry-level `VolatilitySmile`
+- OTM quote selection
+- Duplicate-strike resolution
+- ATM definition
+- Strike, delta, and log-moneyness coordinates
+- Bid-mid-ask IV spread
+- Liquidity-aware point selection
+- ATM volatility
+- Skew slope
+- Curvature
 - Risk reversals
 - Butterflies
-- Term-structure analysis
-- ATM volatility extraction
-- Skew slope and curvature metrics
+- Term structure
 
 ### Status
 
@@ -1888,25 +1966,30 @@ Transform cleaned option prices into consistent implied-volatility structures an
 
 ---
 
-## Stage 3.3 — Volatility Surface Construction
+## Stage 3.3 — Non-Parametric Volatility Surface
+
+### Scope
+
+Construct transparent, explainable volatility surfaces before introducing
+parametric models.
 
 ### Planned Capabilities
 
-- Strike-expiry grids
-- Interpolation in total variance
-- Forward-moneyness coordinates
-- Missing-data handling
-- Smoothness controls
-- Surface diagnostics
-- Extrapolation policies
+- Total variance interpolation using `w(k,T)=sigma_imp^2(k,T)T`
+- Log-forward-moneyness coordinate
+- Per-expiry smile interpolation
+- Maturity interpolation
+- Explicit extrapolation policy
+- Sparse-grid handling
+- Fitted-versus-observed residuals
+- Query API
 
 ### Validation
 
 - Recovery of observed liquid quotes
-- Calendar monotonicity checks
-- Butterfly-arbitrage checks
 - Stability under sparse data
 - Cross-validation across withheld quotes
+- Fitted-versus-observed residual reporting
 
 ### Status
 
@@ -1914,17 +1997,24 @@ Transform cleaned option prices into consistent implied-volatility structures an
 
 ---
 
-## Stage 3.4 — Parametric Volatility Models
+## Stage 3.4 — Surface and Smile Arbitrage Diagnostics
+
+### Scope
+
+Detect, report, and quantify model-independent arbitrage diagnostics for observed
+smiles and interpolated surfaces. This stage does not automatically repair
+violations.
 
 ### Planned Capabilities
 
-- SVI smile parameterisation
-- SSVI surface construction
-- Calibration objectives
-- Weighted calibration using spreads or Vega
-- Parameter constraints
-- Arbitrage diagnostics
-- Calibration error reporting
+- Calendar total-variance monotonicity
+- Strike convexity and butterfly consistency
+- Risk-neutral density positivity diagnostics
+- Wing behaviour
+- Interpolation-induced violations
+- Observed quote residuals
+- Violation severity and magnitude
+- Detect, report, and quantify-only workflow
 
 ### Status
 
@@ -1932,7 +2022,34 @@ Transform cleaned option prices into consistent implied-volatility structures an
 
 ---
 
-## Stage 3.5 — Volatility Dynamics
+## Stage 3.5 — Parametric Volatility Models
+
+### Planned Capabilities
+
+- SVI per-expiry smile parameterisation
+- SSVI surface construction
+- Weighted least squares
+- Spread weighting
+- Vega weighting
+- Parameter constraints
+- Robust initialisation
+- Calibration diagnostics
+- Fitted residuals
+- Arbitrage diagnostics
+- Comparison against the non-parametric surface
+
+### Status
+
+**Planned**
+
+---
+
+## Stage 3.6 — Volatility Dynamics
+
+### Scope
+
+Conduct historical volatility research using time-series snapshots rather than a
+single-day option chain.
 
 ### Planned Research
 
@@ -1940,9 +2057,10 @@ Transform cleaned option prices into consistent implied-volatility structures an
 - Volatility risk premium
 - Sticky-strike behaviour
 - Sticky-delta behaviour
-- Smile dynamics after spot moves
+- Smile response to spot moves
 - Term-structure evolution
-- Event-volatility decomposition
+- Event volatility
+- Regime analysis
 
 ### Status
 
@@ -2345,9 +2463,12 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Begin Stage 3.1 — Implied Volatility Chains
-2. Build chain-wide implied-volatility workflows
-3. Build volatility-surface diagnostics and research workflows
+1. Begin Stage 3.2 — Smile Representation and Skew Analysis
+2. Define expiry-level smile and quote-selection semantics
+3. Build smile metrics and term-structure workflows
+4. Build non-parametric surface construction
+5. Add model-independent smile and surface arbitrage diagnostics
+6. Add SVI / SSVI calibration only after diagnostics are reusable
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.
 

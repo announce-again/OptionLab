@@ -168,7 +168,7 @@ mc_delta = numerical_delta(
 - [x] Stage 1.7: Asian option Monte Carlo pricing
 - [x] Stage 1.8: Numerical Greeks
 - [x] Stage 2: Market data infrastructure
-- [ ] Stage 3: Volatility surfaces
+- [ ] Stage 3: Volatility research
 - [ ] Stage 5: Portfolio risk
 - [ ] Stage 6: Market-making simulation
 
