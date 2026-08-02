@@ -40,6 +40,15 @@ and market-making research platform.
 - Vega, spot moneyness, forward moneyness, and log-forward-moneyness
 - Deterministic records, DataFrame, and CSV exports
 - Executable 50,000-row ingestion-to-IV pipeline
+- Expiry-level OTM smile representation built directly from IV chains
+- Configurable quote-side, quality, liquidity, duplicate, and ATM selection
+- Machine-readable point, quote-selection, and group diagnostics
+- Separate nearest-forward and observed-ATM semantics
+- Total-variance ATM interpolation without single-sided extrapolation
+- Local total-variance skew slope and curvature with partial-result diagnostics
+- Signed-delta IV interpolation without extrapolation
+- Call-minus-put risk reversals and symmetric delta butterflies
+- Deterministic expiry term structures and aggregate Stage 3.2 exports
 
 ### Engineering
 
@@ -48,7 +57,15 @@ and market-making research platform.
 See [Stage 2 summary](docs/stage_2_summary.md) for the full market-data
 infrastructure overview and the
 [Stage 3.1 volatility pipeline](docs/volatility_pipeline.md) for the large
-end-to-end workflow and benchmark.
+end-to-end workflow and benchmark, and
+[Stage 3.2 smile selection](docs/volatility_smiles.md) for the research-smile
+boundary and default policy, and
+[Stage 3.2 smile metrics](docs/smile_metrics.md) for ATM interpolation and local
+total-variance metrics, [delta smile metrics](docs/delta_smile_metrics.md) for
+signed-delta/RR/BF conventions, and
+[volatility term structures](docs/volatility_term_structure.md) for expiry-level
+representation. The [Stage 3.2 completion summary](docs/stage_3_2_summary.md)
+documents the 50,000-row conservation and separate throughput boundaries.
 
 ## Installation
 

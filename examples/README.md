@@ -8,6 +8,7 @@ python -m pip install -e .
 python examples/stage_1/01_black_scholes_pricing.py
 python examples/market_data/09_end_to_end_pipeline.py
 python examples/market_data/10_stage_3_1_volatility_pipeline.py --rows 50000
+python examples/market_data/11_stage_3_2_volatility_smiles.py --rows 50000
 ```
 
 The examples require no network access or provider credentials. Market-data
@@ -51,6 +52,7 @@ The market-data examples progressively demonstrate:
 8. Deterministic dataset serialisation
 9. End-to-end Stage 2 pipeline
 10. End-to-end Stage 3.1 CSV-to-IV pipeline
+11. Complete Stage 3.2 smile selection, metrics, RR/BF, and term structures
 
 - `market_data/01_build_canonical_snapshot.py` - manual canonical snapshot construction
 - `market_data/02_ingest_provider_csv.py` - provider-style CSV to canonical snapshots
@@ -64,6 +66,11 @@ The market-data examples progressively demonstrate:
 - `market_data/10_stage_3_1_volatility_pipeline.py` - deterministic 50,000-row
   CSV ingestion, enrichment, cleaning, IV-chain construction, diagnostics, and
   CSV export
+- `market_data/11_stage_3_2_volatility_smiles.py` - builds expiry-level OTM
+  smiles directly from the Stage 3.1 chain; exports selected points,
+  quote/group diagnostics, ATM/local total-variance metrics, signed-delta IV,
+  risk reversals, butterflies, term structures, summaries, and deterministic
+  hashes
 
 Generated dataset outputs are written under `.tmp/examples_output/`.
 

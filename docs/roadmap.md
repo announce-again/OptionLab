@@ -1967,7 +1967,45 @@ This stage owns quote-selection policy for smile research.
 
 ### Status
 
-**Planned**
+**Complete**
+
+### Implemented in Stage 3.2.1-3.2.6
+
+- `VolatilitySmilePoint`, `VolatilitySmile`, `SmileSelectionConfig`, and
+  `SmileSelectionDiagnostic` domain models
+- Expiry grouping directly from `ImpliedVolatilityChain`
+- Explicit bid, midpoint, or ask IV source selection
+- Forward-based OTM selection and configurable liquidity filters
+- Latest-timestamp resolution and explicit call/put duplicate-strike policy
+- Separate nearest-forward and observed-ATM semantics
+- Group market-state consistency validation with group-level diagnostics
+- Machine-readable unavailable delta and IV-spread flags
+- Strike, delta, moneyness, bid-mid-ask IV, Vega, and liquidity representation
+- Stable records and pandas exports for selected points and diagnostics
+- Medium pipeline integration and separately marked 50,000-row smoke coverage
+
+### Implemented Metrics and Term Structure
+
+- Observed or bracketed linear total-variance ATM volatility
+- Explicit no-extrapolation policy with independent metric failure reasons
+- Unweighted local quadratic fit on configurable observed points
+- Total-variance skew slope `dw/dk` at `k=0`
+- Total-variance curvature `d2w/dk2` at `k=0`
+- Partial success across ATM, skew, and curvature
+- Stable records and pandas export with source-point and fit-policy semantics
+- Synthetic linear/quadratic recovery and pipeline integration coverage
+- Signed-delta target IV interpolation with exact-match precedence
+- Explicit no-extrapolation, ambiguity, and degenerate-coordinate diagnostics
+- Call-minus-put risk reversals and symmetric delta butterflies
+- Reuse of the exact Stage 3.2 ATM result for butterfly calculations
+- Independent call, put, RR, and BF statuses with partial success
+- Expiry term structures grouped by symbol and valuation snapshot
+- Explicit duplicate-expiry/maturity error policy
+- Aggregate Stage 3.2 orchestration and independent summary counts
+- Deterministic records, pandas DataFrames, CSV bytes, and SHA-256 exports
+- Medium integration and separately marked 50,000-row end-to-end validation
+
+Stage 3.3 surface work has not begun.
 
 ---
 
@@ -2468,12 +2506,11 @@ Potential work includes:
 
 The immediate development sequence is:
 
-1. Begin Stage 3.2 — Smile Representation and Skew Analysis
-2. Define expiry-level smile and quote-selection semantics
-3. Build smile metrics and term-structure workflows
-4. Build non-parametric surface construction
-5. Add model-independent smile and surface arbitrage diagnostics
-6. Add SVI / SSVI calibration only after diagnostics are reusable
+1. Begin Stage 3.3 - Non-Parametric Volatility Surface
+2. Add per-expiry total-variance interpolation in log-forward-moneyness
+3. Add explicit maturity interpolation and extrapolation policies
+4. Add model-independent smile and surface arbitrage diagnostics
+5. Add SVI / SSVI calibration only after diagnostics are reusable
 
 The project should not advance to complex volatility or market-making research until the foundational numerical methods are independently validated.
 

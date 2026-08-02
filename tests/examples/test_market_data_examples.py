@@ -62,3 +62,28 @@ def test_stage_3_1_pipeline_example_runs(monkeypatch, tmp_path) -> None:
 
     assert (output_dir / "synthetic_option_quotes.csv").is_file()
     assert (output_dir / "implied_volatility_chain.csv").is_file()
+
+
+def test_stage_3_2_analysis_example_runs(monkeypatch, tmp_path) -> None:
+    repo_root = Path(__file__).parents[2]
+    output_dir = tmp_path / "volatility_smiles"
+    path = (
+        repo_root
+        / "examples"
+        / "market_data"
+        / "11_stage_3_2_volatility_smiles.py"
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [str(path), "--rows", "500", "--output-dir", str(output_dir)],
+    )
+
+    runpy.run_path(str(path), run_name="__main__")
+
+    assert (output_dir / "volatility_smile_points.csv").is_file()
+    assert (output_dir / "analysis" / "smile_metrics.csv").is_file()
+    assert (output_dir / "analysis" / "delta_volatility.csv").is_file()
+    assert (output_dir / "analysis" / "risk_reversals.csv").is_file()
+    assert (output_dir / "analysis" / "butterflies.csv").is_file()
+    assert (output_dir / "analysis" / "term_structures.csv").is_file()
