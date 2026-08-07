@@ -28,3 +28,5 @@ reports/generated/
 Thumbs.db
 .vscode/
 .idea/
+
+data/interim/**/*.duckdb

@@ -1,0 +1,6 @@
+hypothesis,status,evidence
+H1,supported_in_zero_carry_not_robust,"Zero-carry ranking=[150, 90, 45, 21]; flat 4% rate/1.5% dividend ranking=[45, 90, 21, 150]."
+H2,supported_across_both_carry_specs,"Next-day spread coefficients: baseline=0.597443 (p=0.000234207), alternative=0.574631 (p=0.000659907)."
+H3,supported_descriptively_across_carry_specs,"21D extreme/low median-instability ratios: baseline=4.56x, alternative=4.59x."
+H7,supported_ranking_differs,"Stability ranking from most to least stable: IV=[150, 90, 45, 21]; total variance=[150, 90, 21, 45]."
+H8,not_identified_by_pilot_design,The pilot preselected nearest expiries before inversion; its fixed-expiry subset is not a like-for-like full expiry panel.

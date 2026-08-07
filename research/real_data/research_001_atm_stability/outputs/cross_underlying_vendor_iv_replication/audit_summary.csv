@@ -1,0 +1,6 @@
+crossed_market_rows,dates_with_multiple_spot_values,dte_mismatch,expiration_before_quote,invalid_spot,invalid_strike,maximum_quote_date,minimum_quote_date,missing_ask_rows,missing_bid_rows,negative_bid_rows,negative_vega_rows,non_positive_ask_rows,possible_percent_iv_rows,row_count,underlying,unique_expirations,unique_quote_dates,unique_strikes,weekend_quote_rows
+1174,0,0,0,0,0,2022-12-30T00:00:00,2020-01-02T00:00:00,1390,1389,0,7602,5053,3105,768574,AAPL,176,757,387,0
+217,0,0,0,0,0,2022-12-30T00:00:00,2020-01-02T00:00:00,4407,4407,0,6995,0,6840,1048761,NVDA,171,756,652,0
+1880,0,0,0,0,0,2022-12-30T00:00:00,2021-01-04T00:00:00,1028,1028,0,22375,8366,2222,1775749,QQQ,321,508,459,0
+8101,0,0,0,0,0,2022-12-30T00:00:00,2020-01-02T00:00:00,1296,1296,0,74097,14601,5442,3589079,SPY,514,758,641,0
+1060,0,0,0,0,0,2022-12-30T00:00:00,2020-01-02T00:00:00,1012,1012,0,19008,5573,31904,2319764,TSLA,176,758,1216,0

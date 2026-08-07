@@ -1,0 +1,6 @@
+hypothesis,status,evidence
+H1,supported_in_pilot,Median |ΔATMIV| declines from 0.012768 at 21D to 0.014150 at 150D.
+H2,supported_in_pilot,"Next-day ATM-spread HAC coefficient=0.574631, p=0.000659907."
+H3,supported_descriptively,21D extreme-regime median instability is 4.59x the low-regime value.
+H7,supported_ranking_differs,"Stability ranking from most to least stable: IV=[45, 90, 21, 150]; total variance=[90, 150, 21, 45]."
+H8,not_identified_by_pilot_design,The pilot preselected nearest expiries before inversion; its fixed-expiry subset is not a like-for-like full expiry panel.

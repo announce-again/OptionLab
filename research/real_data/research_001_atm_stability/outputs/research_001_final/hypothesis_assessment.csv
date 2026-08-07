@@ -1,0 +1,9 @@
+assessment,evidence,hypothesis
+conditional_not_robust,"Shorter tenors are less stable in long vendor IV and zero-carry NCX, but the flat 4%/1.5% carry sensitivity changes the maturity ranking.",H1
+supported_in_spy_pilot,"ATM bid-ask IV spread predicts next-day absolute change in both NCX carry specifications (positive coefficients, p<0.001).",H2
+supported_descriptively,Extreme-regime 21D median instability is about four times the low-regime value in both long vendor IV and NCX pilot evidence.,H3
+absolute_supported_relative_not_supported,"ETFs have smaller absolute changes, but at 21D their median relative instability exceeds the stock aggregate.",H4
+supported_descriptively,High-IV stocks show much larger absolute changes; relative differences shrink or reverse.,H5
+exploratory_not_confirmatory,"TSLA retains a positive fixed effect, but five clusters are insufficient for confirmatory inference.",H6
+supported,ATM IV and relative total-variance stability produce different tenor rankings.,H7
+not_identified,"Nearest-tenor and fixed-expiry summaries differ, but design suitability is not a causal or statistical hypothesis in the current panels.",H8
