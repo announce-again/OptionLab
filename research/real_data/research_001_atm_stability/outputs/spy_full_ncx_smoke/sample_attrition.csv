@@ -1,0 +1,17 @@
+expiration,quote_date,raw_count,reason,remaining_count,stage,underlying
+,2010-01-04,870,cleaning_policy_rejection,869,cleaning,
+,2010-01-05,858,cleaning_policy_rejection,848,cleaning,
+,2010-01-06,858,cleaning_policy_rejection,841,cleaning,
+,2010-01-07,862,cleaning_policy_rejection,847,cleaning,
+,2010-01-08,862,cleaning_policy_rejection,860,cleaning,
+,,18937168,dte_7_180_and_abs_log_moneyness_le_0.40,9543050,full_history_scope,SPY
+,2010-01-04,869,one_or_more_iv_results_failed,694,iv_inversion,
+,2010-01-05,848,one_or_more_iv_results_failed,673,iv_inversion,
+,2010-01-06,841,one_or_more_iv_results_failed,662,iv_inversion,
+,2010-01-07,847,one_or_more_iv_results_failed,667,iv_inversion,
+,2010-01-08,860,one_or_more_iv_results_failed,674,iv_inversion,
+,2010-01-04,870,row_parse_or_schema_error,870,stage2_ingestion,
+,2010-01-05,858,row_parse_or_schema_error,858,stage2_ingestion,
+,2010-01-06,858,row_parse_or_schema_error,858,stage2_ingestion,
+,2010-01-07,862,row_parse_or_schema_error,862,stage2_ingestion,
+,2010-01-08,862,row_parse_or_schema_error,862,stage2_ingestion,

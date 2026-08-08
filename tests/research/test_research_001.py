@@ -1,4 +1,5 @@
 from datetime import date
+import math
 
 import pandas as pd
 import pytest
@@ -14,6 +15,12 @@ from research.real_data.research_001_atm_stability.build_tenor_panel import (
     build_nearest_tenor_panel,
 )
 from research.real_data.research_001_atm_stability.config import Research001Config
+from research.real_data.research_001_atm_stability.historical_carry import (
+    CashDividendScheduleCurve,
+    InterpolatedZeroRateCurve,
+    projected_dividend_schedule,
+    trailing_dividend_cash,
+)
 
 
 def _wide_rows():
@@ -144,3 +151,46 @@ def test_config_hash_is_stable_and_validates_parallel_tuples(tmp_path) -> None:
             target_tenors=(21, 45),
             tenor_tolerances=(7,),
         )
+
+
+def test_interpolated_zero_rate_curve_uses_flat_endpoints_and_linear_interior() -> None:
+    curve = InterpolatedZeroRateCurve((0.25, 0.5, 1.0), (0.02, 0.03, 0.05))
+
+    assert curve.zero_rate(0.10) == pytest.approx(0.02)
+    assert curve.zero_rate(0.375) == pytest.approx(0.025)
+    assert curve.zero_rate(2.0) == pytest.approx(0.05)
+    assert curve.discount_factor(0.5) == pytest.approx(math.exp(-0.03 * 0.5))
+
+
+def test_projected_dividend_schedule_does_not_use_future_amounts() -> None:
+    distributions = pd.DataFrame(
+        {
+            "ex_date": pd.to_datetime(["2019-12-20", "2020-03-20", "2020-06-19"]),
+            "cash_dividend": [1.20, 1.40, 1.35],
+        }
+    )
+
+    dates, amounts = projected_dividend_schedule(
+        distributions,
+        quote_date=date(2020, 1, 2),
+    )
+
+    assert dates[:2] == (date(2020, 3, 20), date(2020, 6, 19))
+    assert amounts[:2] == (1.20, 1.20)
+    assert trailing_dividend_cash(distributions, date(2020, 3, 20)) == pytest.approx(2.60)
+
+
+def test_cash_dividend_curve_respects_ex_date_timing() -> None:
+    risk_curve = InterpolatedZeroRateCurve((0.25, 1.0), (0.02, 0.02))
+    curve = CashDividendScheduleCurve(
+        quote_date=date(2020, 1, 2),
+        spot=100.0,
+        ex_dates=(date(2020, 3, 20), date(2020, 6, 19)),
+        cash_amounts=(1.0, 1.0),
+        risk_free_curve=risk_curve,
+    )
+
+    assert curve.discount_factor(30 / 365) == pytest.approx(1.0)
+    dividend_maturity = (date(2020, 3, 20) - date(2020, 1, 2)).days / 365
+    expected = (100.0 - math.exp(-0.02 * dividend_maturity)) / 100.0
+    assert curve.discount_factor(90 / 365) == pytest.approx(expected)

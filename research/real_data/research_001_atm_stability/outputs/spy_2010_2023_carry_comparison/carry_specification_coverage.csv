@@ -1,0 +1,5 @@
+carry_specification,expiry_rows,coverage_fraction,first_quote_date,last_quote_date
+flat_3m_treasury_projected_dividend_schedule,49220,1.0,2010-01-04,2023-12-29
+sofr_flat_projected_dividend_schedule,28171,0.5723486387647297,2018-04-03,2023-12-29
+treasury_projected_dividend_schedule,49220,1.0,2010-01-04,2023-12-29
+treasury_trailing_dividend_yield,49220,1.0,2010-01-04,2023-12-29

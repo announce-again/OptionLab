@@ -27,6 +27,9 @@ Stage 3.3 constant-maturity interpolation is intentionally not represented as
 complete. Nearest-expiry output remains the baseline until that production
 stage exists.
 
+The canonical English Research 001A report is available at
+`outputs/spy_2010_2023_carry_comparison/research_001A_full_report_en.md`.
+
 ## Freeze provenance
 
 After downloading a Kaggle dataset into its final raw directory:
@@ -70,6 +73,53 @@ rows.
 This prevents the pilot zero-rate/zero-dividend diagnostic from being confused
 with the baseline rate/dividend enrichment. The callback and its source hashes
 belong in `run_manifest.json`.
+
+## Historical carry and full-history reconstruction
+
+Research 001A now freezes and enriches the 2010–2023 SPY sample with:
+
+- linearly interpolated DGS1MO/DGS3MO/DGS6MO/DGS1/DGS2 Treasury proxies and
+  continuously compounded discount factors;
+- State Street SPY distribution ex-dates with the latest cash amount known on
+  each quote date (baseline);
+- a trailing-365-day cash dividend yield alternative;
+- flat-DGS3MO and available-period flat-SOFR diagnostics; and
+- a put-call-parity option-implied forward diagnostic that is never used as a
+  formal carry input.
+
+Build carry inputs with `build_historical_carry`, then run
+`run_spy_full_ncx` once for each formal specification:
+
+```powershell
+.\.venv\Scripts\python.exe -B -m `
+  research.real_data.research_001_atm_stability.run_spy_full_ncx `
+  --options-database data\interim\research_001\spy_full_vendor\spy_full_vendor.duckdb `
+  --dataset-manifest data\raw\kaggle\spy_options_2010_2023\dataset_manifest.json `
+  --rate-panel data\processed\research_001\carry\historical_rate_panel.parquet `
+  --distribution-panel data\processed\research_001\carry\spy_distribution_history.parquet `
+  --carry-panel data\processed\research_001\carry\carry_expiry_panel.parquet `
+  --option-implied-panel data\processed\research_001\carry\option_implied_forward_diagnostic.parquet `
+  --audit-source-dir research\real_data\research_001_atm_stability\outputs\spy_2010_2023_vendor_iv_replication `
+  --interim-dir data\interim\research_001\spy_full_ncx_baseline `
+  --output-dir research\real_data\research_001_atm_stability\outputs\spy_2010_2023_ncx_baseline `
+  --specification treasury_projected_dividend_schedule `
+  --workers 4
+```
+
+Daily expiry partitions are checkpoints. A rerun reuses completed dates and
+records dates with no two-sided quotes in `daily_exclusions.csv`; it never
+silently drops them. Use `treasury_trailing_dividend_yield` with separate
+interim/output directories for the formal alternative.
+
+Run `compare_carry_specifications` after vendor, baseline, and alternative
+panels exist. It uses a common underlying-date-tenor sample and requires the
+same finite previous observation for three-way daily-change comparisons. The
+comparison output includes stability tables, paired differences, carry
+coverage, numerical validation, a figure, source hashes, and output hashes.
+
+Treasury yields remain financing proxies rather than option OIS curves. SOFR
+is represented only as a flat available-period diagnostic, and option-implied
+forwards remain diagnostic because SPY options are American.
 
 Install optional research dependencies with:
 

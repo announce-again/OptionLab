@@ -1,0 +1,7 @@
+specification,expiry_or_tenor,row_count,atm_mid_success_count,finite_bid_mid_ask_count,bid_mid_ask_ordering_exception_count,positive_discount_factor_count,duplicate_key_count
+ncx_treasury_projected_dividends,expiry_panel,49142,49110,49110,0,49142,0
+ncx_treasury_projected_dividends,tenor_panel,12808,12808,12808,0,12808,0
+ncx_treasury_trailing_dividend_yield,expiry_panel,49142,49109,49109,2,49142,0
+ncx_treasury_trailing_dividend_yield,tenor_panel,12808,12808,12808,0,12808,0
+vendor_iv_replication,expiry_panel,49175,49175,0,0,0,0
+vendor_iv_replication,tenor_panel,12835,12835,0,0,0,0
